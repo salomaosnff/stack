@@ -8,7 +8,7 @@ class Router extends Routeable {
 
     public function __construct(string $url = '/', string $namespace = '') {
         parent::__construct($url, 'router');
-        $this->ns = !empty($namespace) ? preg_replace("@(?!\\\)$@", "\\", $namespace) : $namespace;
+        $this->ns = $namespace;
     }
 
     public function route($url) : Route {
@@ -22,7 +22,7 @@ class Router extends Routeable {
             if ($middleware instanceof Router) {
                 $this->sub_routers[] = $middleware;
             } else if (is_string($middleware)) {
-                $middleware = \preg_replace('@^(?!\\\)@', $this->ns, $middleware);
+                $middleware = "$this->ns\\$middleware";
                 parent::use(new $middleware);
             } else parent::use($middleware);
         }
