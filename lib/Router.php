@@ -4,11 +4,9 @@ namespace Stack\Lib;
 class Router extends Routeable {
     private $routes = [];
     private $sub_routers = [];
-    private $ns = '';
 
-    public function __construct(string $url = '/', string $namespace = '') {
+    public function __construct(string $url = '/') {
         parent::__construct($url, 'router');
-        $this->ns = $namespace;
     }
 
     public function route($url) : Route {
@@ -22,7 +20,6 @@ class Router extends Routeable {
             if ($middleware instanceof Router) {
                 $this->sub_routers[] = $middleware;
             } else if (is_string($middleware)) {
-                $middleware = "$this->ns\\$middleware";
                 parent::use(new $middleware);
             } else parent::use($middleware);
         }

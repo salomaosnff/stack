@@ -3,7 +3,7 @@ namespace Stack\Lib;
 
 class StackApp extends Router {
     public function __construct () {
-        parent::__construct('/', '\App\Routers');
+        parent::__construct('/');
     }
     public function init(Router ...$routers) {
         $request = HttpRequest::get_current();
