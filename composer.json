@@ -1,6 +1,7 @@
 {
     "name": "sallon/stack",
     "type": "library",
+    "version": "0.0.1",
     "authors": [
         {
             "name": "Salomão Neto",
