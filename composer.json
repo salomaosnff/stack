@@ -1,0 +1,19 @@
+{
+    "name": "sallon/stack",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Salomão Neto",
+            "email": "salomaosnff3@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Stack\\Lib\\": "lib/",
+            "\\App\\Routers\\": "test/routers/"
+        }
+    }
+}
