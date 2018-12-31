@@ -19,9 +19,7 @@ class Router extends Routeable {
         foreach($middlewares as $middleware) {
             if ($middleware instanceof Router) {
                 $this->sub_routers[] = $middleware;
-            } else if (is_string($middleware)) {
-                parent::use(new $middleware);
-            } else parent::use($middleware);
+            } parent::use($middleware);
         }
     }
 

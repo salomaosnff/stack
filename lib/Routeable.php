@@ -83,7 +83,7 @@ abstract class Routeable {
         $this->params = $url['params'];
     }
 
-    public function use(callable ...$middlewares) {
+    public function use(...$middlewares) {
         $this->stack_global->use(...$middlewares);
         return $this;
     }
