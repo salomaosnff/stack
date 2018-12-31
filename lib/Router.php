@@ -22,9 +22,7 @@ class Router extends Routeable {
             if ($middleware instanceof Router) {
                 $this->sub_routers[] = $middleware;
             } else if (is_string($middleware)) {
-                var_dump($this->ns);
                 $middleware = \preg_replace('@^(?!\\\)@', $this->ns, $middleware);
-                var_dump("CLASS $middleware EXISTS? ".class_exists($middleware, true));
                 parent::use(new $middleware);
             } else parent::use($middleware);
         }
