@@ -2,8 +2,8 @@
 namespace Stack\Lib;
 
 class Router extends Routeable {
-    private $routes = [];
-    private $sub_routers = [];
+    protected $routes = [];
+    protected $sub_routers = [];
 
     public function __construct(string $url = '/') {
         parent::__construct($url, 'router');
@@ -23,33 +23,24 @@ class Router extends Routeable {
         }
     }
 
-    public function init(HttpRequest &$request, HttpResponse &$response) {
-        $errors = parent::init($request, $response, 'router');
+    public function init(HttpRequest &$request, HttpResponse &$response, $err = null) {
+        if (!$this->test($request, true)) return null;
 
-        if (!MiddlewareStack::__check_value($errors)) return $errors;
+        $res = parent::init($request, $response, 'router');
+
+        if (!MiddlewareStack::__check_value($res)) return $res;
 
         foreach ($this->sub_routers as $router) {
-            $errors = $router->init($request, $response);
-
-            if ($errors === true || ($errors instanceof HttpResponse)) {
-                $errors = true;
-                break;
-            };
-
-            if ($errors === false) return null;
-            if (is_null($errors)) continue;
-            else return $errors;
+            $res = $router->init($request, $response);
+            if (!is_null($res)) return $res;
         }
 
-        foreach ($this->routes as $route) {
-            $errors = $route->init($request, $response);
+        foreach($this->routes as $route) {
+            $res = $route->init($request, $response);
 
-            if ($errors === true) return true;
-            if ($errors === false) return null;
-            if (is_null($errors)) continue;
-            else return $errors;
+            if (!is_null($res)) return $res;
         }
-
-        return $errors;
+        
+        return $res;
     }
 }

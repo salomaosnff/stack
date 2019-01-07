@@ -25,7 +25,11 @@ class HttpError extends \Exception implements \Throwable {
 
         parent::__construct($message, $status);
 
-        $this->info = $info;
+        $this->info = ($info instanceof \Exception) ? [
+            'message' => $info->getMessage(),
+            'code' => $info->getCode(),
+        ] : $info;
+
         $this->timestamp = time();
     }
 }

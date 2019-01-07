@@ -3,58 +3,51 @@
 namespace Stack\Lib;
 
 class MiddlewareStack {
-    private $stack = [];
+    public $stack = [];
 
+    public static function __check_value ($v) {
+        return is_null($v) || $v instanceof HttpResponse;
+    }
     /**
      * Registra middlewares na stack
      * @param callable|Routeable $middlewares Lista de middlewares
      */
     public function use(...$middlewares) {
         $middlewares = array_filter($middlewares, function($middleware) {
-            return is_callable($middleware) || ($middleware instanceof self);
+            return is_callable($middleware) || ($middleware instanceof self) || ($middleware instanceof Router);
         });
 
         $this->stack = array_merge($this->stack, $middlewares);
+
         return $this;
     }
-
-    public static function __check_value($v) {
-        return (is_bool($v) && $v === true) || is_null($v);
-    }
-
-    private function __next(&...$args) {   
-        if (count($this->stack) <= 0) return true;   
-
-        $middleware = $this->stack[0];
-        $result = true;
-
-        if (is_callable($middleware)) {
-            $func = new \ReflectionFunction($middleware);
-            if ($func->getNumberOfParameters() > count($args)) return true;
-            $result = call_user_func_array($middleware, $args);
-        } else if ($middleware instanceof self) {
-            $result = $middleware->flush(...$args);
-        }
-
-        if (self::__check_value($result)) {
-            array_shift($this->stack);
-            return true;
-        }
-
-        return $result;
-    }
-
-    public function flush(&...$initial_value) {
-        $result = null;
+    
+    public function next (&$req, &$res, $err = null) {
+        if (count($this->stack) <= 0) {
+            return $err;
+        };
         
-        while(self::__check_value($result) && count($this->stack) > 0) {
-            if (is_array($result)) {
-                $result = $this->__next(...$result, ...$initial_value);
-            } else {
-                $result = $this->__next(...$initial_value);
-            }
-        }
+        $middleware = array_shift($this->stack);
+        
+        if (is_callable($middleware)) {
+            $reflex = new \ReflectionFunction($middleware);
+            $args_len = $reflex->getNumberOfParameters();
 
-        return $result;
+            if ($err instanceof HttpResponse) return $err;
+            
+            if ($err === null && $args_len === 2) {
+                $err = $middleware($req, $res);
+                return $this->next($req, $res, $err);
+            }
+
+            if ($err !== null && $args_len === 3) {
+                $err = $middleware($err, $req, $res);
+                return $this->next($req, $res, $err);
+            }
+        } else if ($middleware instanceof self) {
+            $err = $middleware->next($req, $res, $err);
+        }
+        
+        return $this->next($req, $res, $err);
     }
 }

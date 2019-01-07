@@ -2,7 +2,7 @@
 namespace Stack\Lib;
 
 abstract class Routeable {
-    private $mode = 'router';
+    protected $mode = 'router';
     public $baseURL = '/';
     public $regex = '@^/*$@';
     public $params = [];
@@ -45,13 +45,11 @@ abstract class Routeable {
         ];
     }
 
-    private function test(HttpRequest &$request, bool $removeBaseURL = true) {
+    protected function test(HttpRequest &$request, bool $removeBaseURL = true) {
         $name = static::class;
 
         preg_match($this->regex, $request->url, $matches, PREG_UNMATCHED_AS_NULL);
-    
-        $pass = count($matches) > 0 ? "PASS" : "NO PASS";
-
+        
         if (count($matches) <= 0) return false;
 
         $matches = array_slice($matches, 1);
@@ -100,14 +98,10 @@ abstract class Routeable {
 
     private function call_method_stack(HttpRequest &$request, HttpResponse &$response) {
         if (isset($this->stack_methods[$request->method])) {
-            return $this->stack_methods[$request->method]->flush($request, $response);
+            return $this->stack_methods[$request->method]->next($request, $response);
         }
 
-
-        return $this->mode === 'route'
-            ? new HttpError(HttpError::METHOD_NOT_ALLOWED)
-            : null
-            ;
+        return $this->mode === 'route' ? new HttpError(HttpError::METHOD_NOT_ALLOWED) : null;
     }
 
     public function get(callable ...$middlewares) :Routeable {
@@ -137,18 +131,11 @@ abstract class Routeable {
     public function init(
         HttpRequest &$request, 
         HttpResponse &$response
-    ) {
-        $test = $this->test($request, $this->mode === 'router');
-        if (!$test) return false;
-        
-        $global = $this->stack_global->flush($request, $response);
+    ) {        
+        $global = $this->stack_global->next($request, $response);
 
-        if (!MiddlewareStack::__check_value($global)) return $global;
-        
-        $method = $this->call_method_stack($request, $response, $this->mode === 'route');
-
-        if (!MiddlewareStack::__check_value($method)) return $method;
-        
-        return true;
+        if ($global instanceof HttpResponse || !is_null($global)) return $global;
+                        
+        return $this->call_method_stack($request, $response, $this->mode === 'route');
     }
 }

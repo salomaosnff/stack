@@ -15,7 +15,7 @@
     "autoload": {
         "psr-4": {
             "Stack\\Lib\\": "lib/",
-            "\\App\\Routers\\": "test/routers/"
+            "Stack\\Plugins\\": "plugins/"
         }
     }
 }

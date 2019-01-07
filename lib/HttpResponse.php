@@ -3,7 +3,7 @@ namespace Stack\Lib;
 
 class HttpResponse {
     public $headers = [];
-    public $status = 200;
+    public $status = null;
     public $body = '';
     public $locals = [];
     public $app;
@@ -23,6 +23,12 @@ class HttpResponse {
 
     public function write(string $data) {
         $this->body .= $data;
+        return $this;
+    }
+
+    public function clear() {
+        $this->status = null;
+        $this->body = '';
         return $this;
     }
 
@@ -61,19 +67,26 @@ class HttpResponse {
         if ($error instanceof HttpError) {
             $status = $error->getCode();
             $info = $error->info ?? $info;
+        } else if ($error instanceof \Exception) {
+            $error = new HttpError(HttpError::INTERNAL_SERVER_ERROR, [
+                'error' => $error->getMessage(),
+                'code' => $error->getCode()
+            ]);
         }
+
         return $this
             ->status($status)
             ->json([
                 'message' => $error->getMessage(),
                 'code' => $error->getCode(),
-                'info' => $info
+                'info' => $error->info ?? $info
             ])
             ;
     }
 
     public function end ($die = true) {
         $this->send_headers();
+        $this->status = null;
         if ($die) die($this->body);
         echo $this->body;
     }

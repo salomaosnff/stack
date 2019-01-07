@@ -7,20 +7,17 @@ namespace Composer\Autoload;
 class ComposerStaticInited37c699cad73baa980919786d80b889
 {
     public static $prefixLengthsPsr4 = array (
-        '\\' => 
-        array (
-            '\\App\\Routers\\' => 13,
-        ),
         'S' => 
         array (
+            'Stack\\Plugins\\' => 14,
             'Stack\\Lib\\' => 10,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        '\\App\\Routers\\' => 
+        'Stack\\Plugins\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/test/routers',
+            0 => __DIR__ . '/../..' . '/plugins',
         ),
         'Stack\\Lib\\' => 
         array (
@@ -37,6 +34,11 @@ class ComposerStaticInited37c699cad73baa980919786d80b889
         'Stack\\Lib\\Routeable' => __DIR__ . '/../..' . '/lib/Routeable.php',
         'Stack\\Lib\\Router' => __DIR__ . '/../..' . '/lib/Router.php',
         'Stack\\Lib\\StackApp' => __DIR__ . '/../..' . '/lib/StackApp.php',
+        'Stack\\Plugins\\OAuth\\JWT' => __DIR__ . '/../..' . '/plugins/oauth/JWT.php',
+        'Stack\\Plugins\\OAuth\\OAuthControllerInterface' => __DIR__ . '/../..' . '/plugins/oauth/OAuthControllerInterface.php',
+        'Stack\\Plugins\\OAuth\\OAuthPlugin' => __DIR__ . '/../..' . '/plugins/oauth/OAuthPlugin.php',
+        'Stack\\Plugins\\OAuth\\OAuthRequest' => __DIR__ . '/../..' . '/plugins/oauth/OAuthRequest.php',
+        'Stack\\Plugins\\OAuth\\OAuthTokenServer' => __DIR__ . '/../..' . '/plugins/oauth/OAuthServer.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
