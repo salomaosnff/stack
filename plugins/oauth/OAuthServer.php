@@ -148,7 +148,7 @@ class OAuthTokenServer {
             return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
         }
 
-        $user = $this->callMethod('getUser', $payload->sub);
+        $user = $this->callMethod('getUser', $payload->aud);
         if (!$user) {
             return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_user']);
         }
