@@ -2,12 +2,19 @@
 namespace Stack\Lib;
 
 class HttpResponse {
+
     public $headers = [];
     public $status = null;
     public $body = '';
     public $locals = [];
     public $app;
 
+    /**
+     * Add headers to response
+     *
+     * @param array $headers
+     * @return $this
+     */
     public function headers(array $headers) {
         $this->headers = array_merge($this->headers, $headers);
         $this->headers = array_filter($this->headers, function($item) { return !empty($item); });
@@ -15,28 +22,56 @@ class HttpResponse {
         return $this;
     }
 
+    /**
+     * Set response status code
+     *
+     * @param int $code
+     * @return $this
+     */
     public function status(int $code) {
         $this->status = max(0, min(599, $code));
 
         return $this;
     }
 
+    /**
+     * Add data to response body
+     *
+     * @param string $data
+     * @return $this
+     */
     public function write(string $data) {
         $this->body .= $data;
         return $this;
     }
 
+    /**
+     * Clear the response
+     *
+     * @return $this
+     */
     public function clear() {
         $this->status = null;
         $this->body = '';
         return $this;
     }
 
+    /**
+     * Check response type
+     *
+     * @param string $type
+     * @return bool
+     */
     public function is(string $type) {
         $type = preg_quote($type, '@');
-        return (bool) \preg_match("@$type@", $this->headers['Content-Type']);
+        return (bool) \preg_match("@$type@", ($this->headers['Content-Type'] ?? ''));
     }
 
+    /**
+     * Send response headers
+     *
+     * @return $this
+     */
     public function send_headers () {
         \http_response_code($this->status);
         
@@ -47,14 +82,28 @@ class HttpResponse {
         return $this;
     }
 
+    /**
+     * Respond with JSON
+     *
+     * @param $data
+     * @param int $status
+     * @return HttpResponse
+     */
     public function json($data, $status = 200) {
         return $this
             ->status($status)
             ->headers(['Content-Type' => 'application/json'])
-            ->write(json_encode($data))
+            ->write(\json_encode($data))
             ;
     }
 
+    /**
+     * Respond with TEXT
+     *
+     * @param string $data
+     * @param int $status
+     * @return HttpResponse
+     */
     public function text(string $data, $status = 200) {
         return $this
             ->status($status)
@@ -63,6 +112,14 @@ class HttpResponse {
             ;
     }
 
+    /**
+     * Respond with an Error
+     *
+     * @param \Exception $error
+     * @param null $info
+     * @param int $status
+     * @return HttpResponse
+     */
     public function error(\Exception $error, $info = null, $status = 200) {
         if ($error instanceof HttpError) {
             $status = $error->getCode();
@@ -84,6 +141,11 @@ class HttpResponse {
             ;
     }
 
+    /**
+     * End the response
+     *
+     * @param bool $die
+     */
     public function end ($die = true) {
         $this->send_headers();
         $this->status = null;

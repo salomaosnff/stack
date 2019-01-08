@@ -2,9 +2,16 @@
 namespace Stack\Lib;
 
 class StackApp extends Router {
+
     public function __construct () {
         parent::__construct('/');
     }
+
+    /**
+     * Capture the request and start routing
+     *
+     * @return null
+     */
     public function start() {
         $request = HttpRequest::get_current();
         $response = new HttpResponse;

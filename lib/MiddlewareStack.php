@@ -3,14 +3,27 @@
 namespace Stack\Lib;
 
 class MiddlewareStack {
+
+    /**
+     * @var array
+     */
     public $stack = [];
 
+    /**
+     * Validate exception or null
+     *
+     * @param $v
+     * @return bool
+     */
     public static function __check_value ($v) {
         return is_null($v) || $v instanceof HttpResponse;
     }
+
     /**
      * Registra middlewares na stack
-     * @param callable|Routeable $middlewares Lista de middlewares
+     *
+     * @param callable|Routeable|array $middlewares Lista de middlewares
+     * @return MiddlewareStack
      */
     public function use(...$middlewares) {
         $middlewares = array_filter($middlewares, function($middleware) {
@@ -21,7 +34,14 @@ class MiddlewareStack {
 
         return $this;
     }
-    
+
+    /**
+     * @param $req
+     * @param $res
+     * @param null $err
+     * @return HttpResponse|null
+     * @throws \ReflectionException
+     */
     public function next (&$req, &$res, $err = null) {
         if (count($this->stack) <= 0) {
             return $err;

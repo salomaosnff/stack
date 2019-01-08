@@ -1,7 +1,12 @@
 <?php
-
 namespace Stack\Lib;
 
+/**
+ * Convert query string to array of parameters
+ *
+ * @param string $query
+ * @return array
+ */
 function qs_to_array($query = '') {
     $query = \preg_replace('@\?*@', '', $query);
     $result = [];
@@ -31,6 +36,7 @@ function qs_to_array($query = '') {
 }
 
 class HttpRequest {
+
     public $method = null;
     public $url = null;
     public $original_url = null;
@@ -40,7 +46,15 @@ class HttpRequest {
     public $raw_body = null;
     public $headers = null;
     public $remote_address = null;
+    public $params = null;
+    public $app = null;
 
+    /**
+     * Pass every header name to lowercase
+     *
+     * @param $headers
+     * @return array
+     */
     private static function normalizeHeaders($headers) {
         $result = [];
 
@@ -51,6 +65,11 @@ class HttpRequest {
         return $result;
     }
 
+    /**
+     * Capture the current HTTP request
+     *
+     * @return HttpRequest
+     */
     public static function get_current() {
         $url = isset($_GET['$route'])
         ? filter_input(\INPUT_GET, '$route', \FILTER_SANITIZE_STRING)
@@ -83,6 +102,12 @@ class HttpRequest {
         return $req;
     }
 
+    /**
+     * Check current request type
+     *
+     * @param $type
+     * @return bool
+     */
     public function is($type) {
         $mime = preg_quote($type, '@');
         return (bool) preg_match("@$mime@", ($this->headers['content-type'] ?? ''));
