@@ -2,7 +2,7 @@
 
 namespace Stack\Lib;
 
-function qs_to_array ($query = '') {
+function qs_to_array($query = '') {
     $query = \preg_replace('@\?*@', '', $query);
     $result = [];
     $params = explode('&', $query);
@@ -12,8 +12,10 @@ function qs_to_array ($query = '') {
         $name = $param[0];
         $value = $param[1] ?? null;
 
-        if (empty($name)) continue;
-        
+        if (empty($name)) {
+            continue;
+        }
+
         if (isset($result[$name])) {
             if (is_array($result[$name])) {
                 $result[$name][] = $value;
@@ -49,14 +51,15 @@ class HttpRequest {
         return $result;
     }
 
-    public static function get_current () {
+    public static function get_current() {
         $url = isset($_GET['$route'])
-            ? filter_input(\INPUT_GET, '$route', \FILTER_SANITIZE_STRING)
-            : $_SERVER['REQUEST_URI']
-            ;
+        ? filter_input(\INPUT_GET, '$route', \FILTER_SANITIZE_STRING)
+        : $_SERVER['REQUEST_URI']
+        ;
+        $url = Routeable::normalize_url('/', $url);
 
         $req = new self;
-        
+
         $req->method = $_SERVER['REQUEST_METHOD'];
         $req->original_url = preg_replace('@\?.*$@', '', $url);
         $req->url = $url ?? $req->original_url;
@@ -65,9 +68,9 @@ class HttpRequest {
         $req->raw_body = file_get_contents('php://input');
         $req->headers = self::normalizeHeaders(getallheaders());
         $req->remote_address = isset($req->headers["x-forwarded-for"])
-            ? explode($req->headers["x-forwarded-for"], ",")[0]
-            : $_SERVER['REMOTE_ADDR']
-            ;
+        ? explode($req->headers["x-forwarded-for"], ",")[0]
+        : $_SERVER['REMOTE_ADDR']
+        ;
 
         if ($req->is('json')) {
             $req->body = \json_decode($req->raw_body);
@@ -82,6 +85,6 @@ class HttpRequest {
 
     public function is($type) {
         $mime = preg_quote($type, '@');
-        return (bool) preg_match("@$type@", $this->headers['content-type']);
+        return (bool) preg_match("@$mime@", ($this->headers['content-type'] ?? ''));
     }
 }

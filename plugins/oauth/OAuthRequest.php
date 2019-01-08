@@ -14,11 +14,13 @@ class OAuthRequest {
     public $token_payload = null;
 
     public function __construct(HttpRequest $request) {
-        $this->authorization = preg_replace('@^\s*B(earer|asic)|\s*@', '', $request->headers['authorization'] ?? '');
+        $authorization = isset($request->headers['authorization']) ? $request->headers['authorization'] : '';
+
+        $this->authorization = preg_replace('@^\s*B(earer|asic)|\s*@', '', $authorization);
         $this->form = (object) $request->body;
         $this->grant_type = isset($this->form->grant_type) ? $this->form->grant_type : null;
 
-        $is_bearer = preg_match('@^Bearer @', $request->headers['authorization']);
+        $is_bearer = preg_match('@^Bearer @', $authorization);
 
         if ($is_bearer) {
             $this->token_payload = JWT::decode($this->authorization);
@@ -58,7 +60,7 @@ class OAuthRequest {
         ];
     }
 
-    public function hasScope(string ...$scope) {
+    public function hasScope(string...$scope) {
         return count(array_intersect($scope, $this->token_payload->scopes)) == count($scope);
     }
 }

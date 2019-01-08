@@ -12,7 +12,7 @@ class OAuthTokenServer {
         $this->controller = $controller;
     }
 
-    public function callMethod($name, ...$args){
+    public function callMethod($name, ...$args) {
         if (!\function_exists("$this->controller::$name") && in_array($name, ['saveAccessToken'])) {
             return true;
         }
@@ -37,88 +37,126 @@ class OAuthTokenServer {
         }
     }
 
-    private function auth_password(OAuthRequest $request){
+    private function auth_password(OAuthRequest $request) {
         $client = $this->callMethod('getClient', $request->client->id, $request->client->secret);
-        if (empty($client)) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        if (empty($client)) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        }
 
         $user = $this->callMethod('getUser', $request->username, $request->password);
-        if (empty($user)) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_credentials']);
-        
+        if (empty($user)) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_credentials']);
+        }
+
         $accessToken = $this->callMethod('generateAccessToken', $client, $user);
-        if (empty($accessToken)) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_access_token']);
+        if (empty($accessToken)) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_access_token']);
+        }
 
         $refreshToken = $this->callMethod('generateRefreshToken', $client, $user, $accessToken);
-        if (empty($refreshToken)) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_refresh_token']);
+        if (empty($refreshToken)) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_refresh_token']);
+        }
 
         $save = $this->callMethod('saveAccessToken', $accessToken, $refreshToken, $client, $user);
 
-        if (!$save) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'failed_to_save_access_token']);
+        if (!$save) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'failed_to_save_access_token']);
+        }
 
         return (object) [
             'client' => $client,
             'user' => $user,
             'access_token' => $accessToken,
-            'refresh_token' => $refreshToken
+            'refresh_token' => $refreshToken,
         ];
     }
 
     public function auth_refresh_token(OAuthRequest $request) {
         $payload = $this->callMethod('getRefreshToken', $request->refresh_token);
-        if (empty($payload)) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_refresh_token']);
+        if (empty($payload)) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_refresh_token']);
+        }
+
         $payload = (object) $payload;
 
         $client = $this->callMethod('getClient', $request->client->id, $request->client->secret);
-        if (empty($client)) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        if (empty($client)) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        }
+
         $client = (object) $client;
 
         $user = $this->callMethod('getUser', $payload->user);
-        if (empty($user)) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_user']);
+        if (empty($user)) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_user']);
+        }
+
         $user = (object) $user;
 
         $accessToken = $this->callMethod('generateAccessToken', $client, $user);
-        if (empty($accessToken)) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_access_token']);
+        if (empty($accessToken)) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_access_token']);
+        }
 
         $refreshToken = $this->callMethod('generateRefreshToken', $client, $user, $accessToken);
-        if (empty($refreshToken)) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_refresh_token']);
+        if (empty($refreshToken)) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'invalid_refresh_token']);
+        }
 
         $save = $this->callMethod('saveAccessToken', $accessToken, $refreshToken, $client, $user);
 
-        if (!$save) return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'failed_to_save_access_token']);
+        if (!$save) {
+            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, ['code' => 'failed_to_save_access_token']);
+        }
 
         return (object) [
             'client' => $client,
             'user' => $user,
             'access_token' => $accessToken,
-            'refresh_token' => $refreshToken
+            'refresh_token' => $refreshToken,
         ];
     }
 
     public function server(HttpRequest &$request, HttpResponse $response) {
         $result = static::token(new OAuthRequest($request));
+
+        if ($result instanceof \Exception) {
+            return $result;
+        }
+
         return $response->json([
             'access_token' => $result->access_token,
             'refresh_token' => $result->refresh_token,
         ]);
     }
 
-    public function session (HttpRequest &$request, HttpResponse &$response) {
+    public function session(HttpRequest &$request, HttpResponse &$response) {
         $oauth_req = $request->oauth_request;
 
-        if (empty($oauth_req->authorization)) return true;
-        
-        $payload = (object) $this->callMethod('getAccessToken', $oauth_req->authorization);
-        if (!$payload) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_access_token']);
-        
-        $client = $this->callMethod('getClient', $payload->client);
-        if (!$client) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        if (empty($oauth_req->authorization)) {
+            return new HttpError(HttpError::FORBIDDEN, ['code' => 'missing_authorization']);
+        }
 
-        $user = $this->callMethod('getUser', $payload->user);
-        if (!$user) return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_user']);
-        
+        $payload = $this->callMethod('getAccessToken', $oauth_req->authorization);
+        if (!$payload) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_access_token']);
+        }
+
+        $client = $this->callMethod('getClient', $payload->client);
+        if (!$client) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_client']);
+        }
+
+        $user = $this->callMethod('getUser', $payload->sub);
+        if (!$user) {
+            return new HttpError(HttpError::BAD_REQUEST, ['code' => 'invalid_user']);
+        }
+
         $request->auth = (object) [
             'user' => $user,
             'client' => $client,
-            'access_token' => $oauth_req->authorization
+            'access_token' => $oauth_req->authorization,
         ];
     }
 }

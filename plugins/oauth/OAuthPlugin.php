@@ -29,11 +29,11 @@ class OAuthPlugin {
 
     public static function authenticate(...$scopes){
         return function ($req, $res) use ($scopes) {
-            $req->oauth->server->session($req, $res);
+            return $req->oauth->server->session($req, $res);
 
-            if (!$req->oauth_request->hasScope(...$scopes)) {
-                return new HttpError(HttpError::FORBIDDEN, 'Insufficient permissions!');
-            }
+//            if (!$req->oauth_request->hasScope(...$scopes)) {
+//                return new HttpError(HttpError::FORBIDDEN, 'Insufficient permissions!');
+//            }
         };
     }
 }
