@@ -1,12 +1,17 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * Class Routeable
+ * @package Stack\Lib
+ */
 abstract class Routeable {
 
     protected $mode = 'router';
     public $baseURL = '/';
     public $regex = '@^/*$@';
     public $params = [];
+    public $controllers = '';
 
     private $stack_global;
     private $stack_methods = [];
@@ -81,7 +86,11 @@ abstract class Routeable {
             return false;
         }
 
-        $matches = array_slice($matches, 1);
+        if(count($matches) === 1) {
+            $matches = [trim(array_shift($matches), '/')];
+        } else {
+            $matches = array_slice($matches, 1);
+        }
 
         if ($removeBaseURL) {
             $request->url = self::normalize_url(\preg_replace($this->regex, '', $request->url));
@@ -91,23 +100,13 @@ abstract class Routeable {
             $request->params = [];
         }
 
-        $request->params = array_merge($request->params, array_combine($this->params, $matches));
+        $params = @array_combine($this->params, $matches);
+
+        if(is_array($params)) {
+            $request->params = array_merge($request->params, $params);
+        }
 
         return true;
-    }
-
-    public function __construct(
-        string $url = '/',
-        string $mode = 'router'
-    ) {
-        $this->mode = $mode;
-        $this->stack_global = new MiddlewareStack;
-        $this->baseURL = self::normalize_url($url);
-
-        $url = self::parse_url($this->baseURL, $this->mode === 'route');
-
-        $this->regex = $url['regex'];
-        $this->params = $url['params'];
     }
 
     /**
@@ -130,12 +129,33 @@ abstract class Routeable {
      */
     private function register_method(string $method, array $middlewares): Routeable {
         if (!isset($this->stack_methods[$method])) {
-            $this->stack_methods[$method] = new MiddlewareStack;
+            $this->stack_methods[$method] = new MiddlewareStack($this->controllers);
         }
 
-        $this->stack_methods[$method]->use(...$middlewares);
+        $middlewares = array_map(function($middleware) {
+            return self::normalize_method($middleware);
+        }, $middlewares);
 
+        $this->stack_methods[$method]->use(...$middlewares);
         return $this;
+    }
+
+    /**
+     * Normalize a method string, remove '@' and place '::'
+     * with controllers base namespace
+     *
+     * @param string|callable|Routeable $method
+     * @param string|null $controllers Namespace base para os controladores
+     * @return string|string[]|null
+     */
+    public static function normalize_method($method, $controllers = '') {
+        if(is_string($method)) {
+            $controllers = is_null($controllers) ? '' : trim("$controllers", "\\");
+            $method = preg_replace('/\@+/', '::', $method);
+            $method = trim($method, "\\ ");
+            return "\\$controllers\\$method";
+        }
+        return $method;
     }
 
     /**
@@ -156,60 +176,60 @@ abstract class Routeable {
     /**
      * Register GET method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function get(callable ...$middlewares): Routeable {
+    public function get(...$middlewares): Routeable {
         return $this->register_method('GET', $middlewares);
     }
 
     /**
      * Register POST method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function post(callable ...$middlewares): Routeable {
+    public function post(...$middlewares): Routeable {
         return $this->register_method('POST', $middlewares);
     }
 
     /**
      * Register PUT method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function put(callable ...$middlewares): Routeable {
+    public function put(...$middlewares): Routeable {
         return $this->register_method('PUT', $middlewares);
     }
 
     /**
      * Register PATCH method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function patch(callable ...$middlewares): Routeable {
+    public function patch(...$middlewares): Routeable {
         return $this->register_method('PATCH', $middlewares);
     }
 
     /**
      * Register DELETE method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function delete(callable ...$middlewares): Routeable {
+    public function delete(...$middlewares): Routeable {
         return $this->register_method('DELETE', $middlewares);
     }
 
     /**
      * Register HEAD method
      *
-     * @param callable ...$middlewares
+     * @param string|callable ...$middlewares
      * @return Routeable
      */
-    public function head(callable ...$middlewares): Routeable {
+    public function head(...$middlewares): Routeable {
         return $this->register_method('HEAD', $middlewares);
     }
 
@@ -232,5 +252,26 @@ abstract class Routeable {
         }
 
         return $this->call_method_stack($request, $response);
+    }
+
+    /**
+     * @param string $url Route URL
+     * @param string $mode Router/Route
+     * @param string $controllers Controllers base namespace
+     */
+    public function __construct(
+        string $url = '/',
+        string $mode = 'router',
+        string $controllers = ''
+    ) {
+        $this->mode = $mode;
+        $this->controllers = $controllers;
+        $this->stack_global = new MiddlewareStack($this->controllers);
+        $this->baseURL = self::normalize_url($url);
+
+        $url = self::parse_url($this->baseURL, $this->mode === 'route');
+
+        $this->regex = $url['regex'];
+        $this->params = $url['params'];
     }
 }

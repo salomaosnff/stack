@@ -1,10 +1,25 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * StackApp - Main router class
+ * @package Stack\Lib
+ */
 class StackApp extends Router {
 
-    public function __construct () {
-        parent::__construct('/');
+    /**
+     * Base namespace for every controllers in app
+     *
+     * @var string
+     */
+    static $stack_controllers = '';
+
+    /**
+     * @param string $controllers Base namespace for every controller in app
+     */
+    public function __construct ($controllers = '') {
+        parent::__construct('/', $controllers);
+        self::$stack_controllers = $controllers;
     }
 
     /**
@@ -29,7 +44,8 @@ class StackApp extends Router {
                 //     ]);
                 // }
 
-                throw new HttpError(HttpError::NOT_FOUND, "Cannot found $request->original_url.");
+                throw new HttpError(HttpError::NOT_FOUND,
+                    "Cannot found $request->original_url.");
             }
 
             if ($res instanceof HttpError) {

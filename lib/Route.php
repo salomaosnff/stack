@@ -1,6 +1,10 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * Class Route
+ * @package Stack\Lib
+ */
 class Route extends Routeable {
 
     public function __construct (string $url) {

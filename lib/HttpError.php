@@ -1,6 +1,11 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * HTTP Request Exception
+ *
+ * @package Stack\Lib
+ */
 class HttpError extends \Exception implements \Throwable {
 
     const BAD_REQUEST           = [400, 'Bad Request'];
@@ -16,6 +21,11 @@ class HttpError extends \Exception implements \Throwable {
     public $info = null;
     public $timestamp = null;
 
+    /**
+     * @param array|string $status
+     * @param string|array|null $message
+     * @param string|array|\Exception|null $info
+     */
     public function __construct ($status, $message = null, $info = null) {
         if (is_array($status)) {
             $info = $message;

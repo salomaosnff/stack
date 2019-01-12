@@ -2,12 +2,23 @@
 
 namespace Stack\Lib;
 
+/**
+ * Class MiddlewareStack
+ * @package Stack\Lib
+ */
 class MiddlewareStack {
 
     /**
      * @var array
      */
     public $stack = [];
+
+    /**
+     * Controllers namespace
+     *
+     * @var string
+     */
+    public $controllers = '';
 
     /**
      * Validate exception or null
@@ -27,11 +38,9 @@ class MiddlewareStack {
      */
     public function use(...$middlewares) {
         $middlewares = array_filter($middlewares, function($middleware) {
-            return is_callable($middleware) || ($middleware instanceof self) || ($middleware instanceof Router);
+            return is_callable($middleware, true) || ($middleware instanceof self) || ($middleware instanceof Router);
         });
-
         $this->stack = array_merge($this->stack, $middlewares);
-
         return $this;
     }
 
@@ -48,9 +57,19 @@ class MiddlewareStack {
         };
         
         $middleware = array_shift($this->stack);
+        $middleware = Routeable::normalize_method($middleware, $this->controllers);
+
+        $reflex = null;
         
-        if (is_callable($middleware)) {
-            $reflex = new \ReflectionFunction($middleware);
+        if (is_callable($middleware, true)) {
+
+            if(is_string($middleware) && preg_match('/::/', $middleware)) {
+                $method = explode('::', $middleware);
+                $reflex = new \ReflectionMethod($method[0], $method[1]);
+            } else {
+                $reflex = new \ReflectionFunction($middleware);
+            }
+
             $args_len = $reflex->getNumberOfParameters();
 
             if ($err instanceof HttpResponse) return $err;
@@ -69,5 +88,13 @@ class MiddlewareStack {
         }
         
         return $this->next($req, $res, $err);
+    }
+
+    /**
+     * @param string $controllers Controllers sub namespace
+     */
+    public function __construct($controllers = '') {
+        $controllers = trim($controllers, '\\');
+        $this->controllers = StackApp::$stack_controllers . "\\$controllers";
     }
 }

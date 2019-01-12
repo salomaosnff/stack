@@ -1,6 +1,10 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * HTTP Response
+ * @package Stack\Lib
+ */
 class HttpResponse {
 
     public $headers = [];
@@ -38,10 +42,12 @@ class HttpResponse {
      * Add data to response body
      *
      * @param string $data
+     * @param bool $overwrite
      * @return $this
      */
-    public function write(string $data) {
-        $this->body .= $data;
+    public function write(string $data, bool $overwrite = false) {
+        if($overwrite) $this->body = $data;
+        else $this->body .= $data;
         return $this;
     }
 
@@ -90,10 +96,12 @@ class HttpResponse {
      * @return HttpResponse
      */
     public function json($data, $status = 200) {
+        $body = json_decode($this->body, true) ?? '';
+        if(is_array($body)) $data = array_merge($data, $body);
         return $this
             ->status($status)
             ->headers(['Content-Type' => 'application/json'])
-            ->write(\json_encode($data))
+            ->write(\json_encode($data), true)
             ;
     }
 

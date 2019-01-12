@@ -2,48 +2,19 @@
 namespace Stack\Lib;
 
 /**
- * Convert query string to array of parameters
- *
- * @param string $query
- * @return array
+ * HTTP Request
+ * @package Stack\Lib
  */
-function qs_to_array($query = '') {
-    $query = \preg_replace('@\?*@', '', $query);
-    $result = [];
-    $params = explode('&', $query);
-
-    foreach ($params as $param) {
-        $param = explode("=", $param);
-        $name = $param[0];
-        $value = $param[1] ?? null;
-
-        if (empty($name)) {
-            continue;
-        }
-
-        if (isset($result[$name])) {
-            if (is_array($result[$name])) {
-                $result[$name][] = $value;
-            } else {
-                $result[$name] = array($result[$name], $value);
-            }
-        } else {
-            $result[$name] = $value;
-        }
-    }
-
-    return $result;
-}
-
 class HttpRequest {
 
     public $method = null;
     public $url = null;
     public $original_url = null;
-    public $query = null;
+    public $query = [];
     public $query_string = null;
     public $body = null;
     public $raw_body = null;
+    public $files = [];
     public $headers = null;
     public $remote_address = null;
     public $params = null;
@@ -82,8 +53,8 @@ class HttpRequest {
         $req->method = $_SERVER['REQUEST_METHOD'];
         $req->original_url = preg_replace('@\?.*$@', '', $url);
         $req->url = $url ?? $req->original_url;
-        $req->query_string = $_SERVER['QUERY_STRING'] ?? null;
-        $req->query = qs_to_array($req->query_string);
+        $req->query_string = urldecode($_SERVER['QUERY_STRING']) ?? null;
+        $req->query = self::qs_to_array($req->query_string);
         $req->raw_body = file_get_contents('php://input');
         $req->headers = self::normalizeHeaders(getallheaders());
         $req->remote_address = isset($req->headers["x-forwarded-for"])
@@ -91,10 +62,14 @@ class HttpRequest {
         : $_SERVER['REMOTE_ADDR']
         ;
 
+        $req->files = array_map(function($file) {
+            return new FileRequest($file);
+        }, $_FILES);
+
         if ($req->is('json')) {
-            $req->body = \json_decode($req->raw_body);
+            $req->body = \json_decode($req->raw_body, true);
         } else if ($req->is('x-www-form-urlencoded')) {
-            $req->body = qs_to_array($req->raw_body);
+            $req->body = self::qs_to_array($req->raw_body);
         } else if ($req->is('multipart/form-data')) {
             $req->body = $_POST;
         }
@@ -109,7 +84,206 @@ class HttpRequest {
      * @return bool
      */
     public function is($type) {
-        $mime = preg_quote($type, '@');
-        return (bool) preg_match("@$mime@", ($this->headers['content-type'] ?? ''));
+        $type = preg_quote($type, '@');
+        return (bool) preg_match("@$type@", ($this->headers['content-type'] ?? ''));
+    }
+
+    /**
+     * Check if has a param in the body
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasQuery(string ...$keys) {
+        $input = $this->query ?? [];
+
+        foreach ($keys as $val) {
+            if(! in_array($val, array_keys($input))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if has a param in the body
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasBody(string ...$keys) {
+        $input = $this->body ?? [];
+
+        foreach ($keys as $val) {
+            if(! in_array($val, array_keys($input))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if has a file
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasFile(string ...$keys) {
+        $input = $this->files ?? [];
+
+        foreach ($keys as $val) {
+            if(! in_array($val, array_keys($input))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if has any of given keys in query
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasAnyQuery(string ...$keys) {
+        $input = $this->query ?? [];
+
+        foreach ($keys as $val) {
+            if(in_array($val, array_keys($input))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if has any of given keys in body
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasAnyBody(string ...$keys) {
+        $input = $this->body ?? [];
+
+        foreach ($keys as $val) {
+            if(in_array($val, array_keys($input))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if has a any file
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasAnyFile(string ...$keys) {
+        $input = $this->files ?? [];
+
+        foreach ($keys as $val) {
+            if(in_array($val, array_keys($input))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get param from body
+     *
+     * @param $key
+     * @return null
+     */
+    public function form($key) {
+        if($this->hasBody($key)) {
+            return $this->body[$key];
+        }
+        return null;
+    }
+
+    /**
+     * Get param from query
+     *
+     * @param $key
+     * @return null
+     */
+    public function query($key) {
+        if($this->hasQuery($key)) {
+            return $this->query[$key];
+        }
+        return null;
+    }
+
+    /**
+     * Get file from request
+     *
+     * @param $key
+     * @return null|FileRequest
+     */
+    public function file($key) {
+        if($this->hasFile($key)) {
+            return $this->files[$key];
+        }
+        return null;
+    }
+
+    /**
+     * @param string $reference
+     * @param string $field_name
+     * @param string $field_data
+     * @return HttpRequest
+     * @throws \Exception
+     */
+    public function createBase64File(string $reference, string $field_name, string $field_data) {
+        $name = $this->form($field_name);
+        $data = $this->form($field_data);
+        $file = FileRequest::fromBase64($data, $name);
+
+        if($this->hasFile($name)) {
+            throw new \Exception('file_already_exists');
+        }
+
+        $this->files[$reference] = $file;
+        return $this;
+    }
+
+    /**
+     * Convert query string to array of parameters
+     *
+     * @param string $query
+     * @return array
+     */
+    public static function qs_to_array($query = '') {
+        $query = \preg_replace('@\?*@', '', $query);
+        $result = [];
+        $params = explode('&', $query);
+
+        foreach ($params as $param) {
+            $param = explode("=", $param);
+            $name = $param[0];
+            $value = $param[1] ?? null;
+
+            if (empty($name) || $name === '$route') {
+                continue;
+            }
+
+            if (isset($result[$name])) {
+                if (is_array($result[$name])) {
+                    $result[$name][] = $value;
+                } else {
+                    $result[$name] = array($result[$name], $value);
+                }
+            } else {
+                $result[$name] = $value;
+            }
+        }
+
+        return $result;
     }
 }

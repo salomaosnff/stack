@@ -4,7 +4,12 @@ namespace Stack\Plugins\OAuth;
 use Stack\Lib\HttpError;
 use Stack\Lib\HttpRequest;
 
+/**
+ * Class OAuthRequest
+ * @package Stack\Plugins\OAuth
+ */
 class OAuthRequest {
+
     public $authorization = null;
     public $grant_type = null;
     public $username = null;
@@ -13,6 +18,10 @@ class OAuthRequest {
     public $client = null;
     public $token_payload = null;
 
+    /**
+     * @param HttpRequest $request
+     * @throws HttpError
+     */
     public function __construct(HttpRequest $request) {
         $authorization = isset($request->headers['authorization']) ? $request->headers['authorization'] : '';
 
@@ -50,9 +59,14 @@ class OAuthRequest {
         }
     }
 
+    /**
+     * Get client credentials from authorization
+     *
+     * @return object
+     */
     private function getClientCredentials() {
         $credentials = base64_decode($this->authorization);
-        list($id, $secret) = explode(":", $credentials);
+        @list($id, $secret) = explode(":", $credentials);
 
         return (object) [
             'id' => $id,
@@ -60,7 +74,11 @@ class OAuthRequest {
         ];
     }
 
-    public function hasScope(string...$scope) {
+    /**
+     * @param string ...$scope
+     * @return bool
+     */
+    public function hasScope(string ...$scope) {
         return count(array_intersect($scope, $this->token_payload->scopes)) == count($scope);
     }
 }

@@ -1,13 +1,21 @@
 <?php
 namespace Stack\Lib;
 
+/**
+ * Class Router
+ * @package Stack\Lib
+ */
 class Router extends Routeable {
 
     protected $routes = [];
     protected $sub_routers = [];
 
-    public function __construct(string $url = '/') {
-        parent::__construct($url, 'router');
+    /**
+     * @param string $url
+     * @param string $controllers Controllers sub namespace
+     */
+    public function __construct(string $url = '/', $controllers = '') {
+        parent::__construct($url, 'router', $controllers);
     }
 
     /**
@@ -31,8 +39,10 @@ class Router extends Routeable {
     public function use (...$middlewares) {
         foreach ($middlewares as $middleware) {
             if ($middleware instanceof Router) {
+                $middleware->controllers = is_null($middleware->controllers) ? $this->controllers : $middleware->controllers;
                 $this->sub_routers[] = $middleware;
-            }parent::use ($middleware);
+            }
+            parent::use ($middleware);
         }
     }
 
@@ -50,7 +60,7 @@ class Router extends Routeable {
             return null;
         }
 
-        $res = parent::init($request, $response, 'router');
+        $res = parent::init($request, $response);
 
         if (!MiddlewareStack::__check_value($res)) {
             return $res;
