@@ -2,23 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ee001973-0758-4428-a7f0-319043d8ad0d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/lib/FileRequest.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/HttpError.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/HttpError.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/HttpRequest.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/HttpRequest.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/HttpResponse.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/HttpResponse.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/MiddlewareStack.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/MiddlewareStack.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Route.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Route.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Routeable.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Routeable.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/Router.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Router.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/StackApp.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/StackApp.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/oauth/JWT.php" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/oauth/JWT.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/oauth/OAuthControllerInterface.php" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/oauth/OAuthControllerInterface.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/oauth/OAuthPlugin.php" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/oauth/OAuthPlugin.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/oauth/OAuthRequest.php" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/oauth/OAuthRequest.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plugins/oauth/OAuthServer.php" beforeDir="false" afterPath="$PROJECT_DIR$/plugins/oauth/OAuthServer.php" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/vendor/composer/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -47,10 +32,10 @@
   <component name="FileEditorManager">
     <leaf>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/FileRequest.php">
+        <entry file="file://$PROJECT_DIR$/lib/HttpRequest.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="28">
-              <caret line="58" column="7" lean-forward="true" selection-start-line="58" selection-start-column="7" selection-end-line="58" selection-end-column="7" />
+            <state relative-caret-position="180">
+              <caret line="251" column="5" lean-forward="true" selection-start-line="251" selection-start-column="5" selection-end-line="251" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -178,18 +163,19 @@
       <workItem from="1547134423027" duration="42000" />
       <workItem from="1547141314100" duration="9118000" />
       <workItem from="1547269130596" duration="31000" />
-      <workItem from="1547269186478" duration="6900000" />
+      <workItem from="1547269186478" duration="8157000" />
+      <workItem from="1547313377826" duration="3298000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43835000" />
+    <option name="totallyTimeSpent" value="48390000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1368" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2840909" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28863636" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -202,7 +188,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" />
       <window_info anchor="bottom" id="Version Control" order="9" />
-      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.10433387" />
+      <window_info anchor="bottom" id="Terminal" order="10" visible="true" weight="0.09630819" />
       <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -263,13 +249,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/HttpResponse.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="100" column="20" lean-forward="true" selection-start-line="100" selection-start-column="20" selection-end-line="100" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/MiddlewareStack.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="388">
@@ -305,17 +284,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/HttpRequest.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="28">
-          <caret line="235" column="7" lean-forward="true" selection-start-line="235" selection-start-column="7" selection-end-line="235" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/FileRequest.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="28">
           <caret line="58" column="7" lean-forward="true" selection-start-line="58" selection-start-column="7" selection-end-line="58" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/HttpResponse.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="100" column="20" lean-forward="true" selection-start-line="100" selection-start-column="20" selection-end-line="100" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/HttpRequest.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="251" column="5" lean-forward="true" selection-start-line="251" selection-start-column="5" selection-end-line="251" selection-end-column="5" />
         </state>
       </provider>
     </entry>

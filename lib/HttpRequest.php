@@ -53,7 +53,15 @@ class HttpRequest {
         $req->method = $_SERVER['REQUEST_METHOD'];
         $req->original_url = preg_replace('@\?.*$@', '', $url);
         $req->url = $url ?? $req->original_url;
-        $req->query_string = urldecode($_SERVER['QUERY_STRING']) ?? null;
+        $req->query_string = $_SERVER['QUERY_STRING'] ?? null;
+
+        if(! is_null($req->query_string)) {
+            $req->query_string = urldecode(preg_replace('@^(.*/)@', '', $req->query_string));
+            if(substr($req->query_string, 0, 1) === '&') {
+                $req->query_string = substr($req->query_string, 1);
+            }
+        }
+
         $req->query = self::qs_to_array($req->query_string);
         $req->raw_body = file_get_contents('php://input');
         $req->headers = self::normalizeHeaders(getallheaders());
@@ -143,6 +151,24 @@ class HttpRequest {
     }
 
     /**
+     * Check if has a param
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasParam(string ...$keys) {
+        $input = $this->params ?? [];
+
+        foreach ($keys as $val) {
+            if(! in_array($val, array_keys($input))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Check if has any of given keys in query
      *
      * @param string ...$keys
@@ -177,7 +203,7 @@ class HttpRequest {
     }
 
     /**
-     * Check if has a any file
+     * Check if has any file
      *
      * @param string ...$keys
      * @return bool
@@ -195,10 +221,28 @@ class HttpRequest {
     }
 
     /**
+     * Check if has any param
+     *
+     * @param string ...$keys
+     * @return bool
+     */
+    public function hasAnyParam(string ...$keys) {
+        $input = $this->params ?? [];
+
+        foreach ($keys as $val) {
+            if(in_array($val, array_keys($input))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get param from body
      *
      * @param $key
-     * @return null
+     * @return null|mixed
      */
     public function form($key) {
         if($this->hasBody($key)) {
@@ -211,7 +255,7 @@ class HttpRequest {
      * Get param from query
      *
      * @param $key
-     * @return null
+     * @return null|string
      */
     public function query($key) {
         if($this->hasQuery($key)) {
@@ -229,6 +273,19 @@ class HttpRequest {
     public function file($key) {
         if($this->hasFile($key)) {
             return $this->files[$key];
+        }
+        return null;
+    }
+
+    /**
+     * Get file from request
+     *
+     * @param $key
+     * @return null|string
+     */
+    public function param($key) {
+        if($this->hasParam($key)) {
+            return $this->params[$key];
         }
         return null;
     }
