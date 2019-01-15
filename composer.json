@@ -12,8 +12,7 @@
     ],
     "require": {
         "php": "^7.0",
-        "ext-json": "*",
-        "ext-apache": "*"
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {
