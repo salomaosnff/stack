@@ -73,7 +73,12 @@ class MiddlewareStack {
             $args_len = $reflex->getNumberOfParameters();
 
             if ($err instanceof HttpResponse) return $err;
-            
+
+            if($err === null && $args_len === 1) {
+                $err = $middleware($req);
+                return $this->next($req, $res, $err);
+            }
+
             if ($err === null && $args_len === 2) {
                 $err = $middleware($req, $res);
                 return $this->next($req, $res, $err);
@@ -94,7 +99,11 @@ class MiddlewareStack {
      * @param string $controllers Controllers sub namespace
      */
     public function __construct($controllers = '') {
+        $baseNamespace = trim(StackApp::$stack_controllers, '\\');
+        if(substr($controllers, 0, 1) === '\\') {
+            $baseNamespace = '';
+        }
         $controllers = trim($controllers, '\\');
-        $this->controllers = StackApp::$stack_controllers . "\\$controllers";
+        $this->controllers = '\\' . trim($baseNamespace . '\\' . $controllers, '\\');
     }
 }

@@ -18,8 +18,8 @@ class StackApp extends Router {
      * @param string $controllers Base namespace for every controller in app
      */
     public function __construct ($controllers = '') {
-        parent::__construct('/', $controllers);
         self::$stack_controllers = $controllers;
+        parent::__construct('/');
     }
 
     /**

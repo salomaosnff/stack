@@ -7,8 +7,8 @@ namespace Stack\Lib;
  */
 class Route extends Routeable {
 
-    public function __construct (string $url) {
-        parent::__construct($url, 'route');
+    public function __construct (string $url, $controllers = '') {
+        parent::__construct($url, 'route', $controllers);
     }
 
     public function init (HttpRequest &$request, HttpResponse &$response) {

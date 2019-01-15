@@ -152,8 +152,14 @@ abstract class Routeable {
         if(is_string($method)) {
             $controllers = is_null($controllers) ? '' : trim("$controllers", "\\");
             $method = preg_replace('/\@+/', '::', $method);
-            $method = trim($method, "\\ ");
-            return "\\$controllers\\$method";
+
+            if(empty($controllers)) {
+                return $method;
+            }
+            else if(substr($method, 0, 1) === '\\') {
+                $controllers = '';
+            }
+            return "\\" . trim("$controllers\\$method", "\\");
         }
         return $method;
     }

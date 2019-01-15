@@ -3,7 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="ee001973-0758-4428-a7f0-319043d8ad0d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/HttpRequest.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/HttpRequest.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/MiddlewareStack.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/MiddlewareStack.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Route.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Route.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Routeable.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Routeable.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/Router.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/Router.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/StackApp.php" beforeDir="false" afterPath="$PROJECT_DIR$/lib/StackApp.php" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/vendor/composer/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -30,17 +34,7 @@
     <select />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/lib/HttpRequest.php">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="251" column="5" lean-forward="true" selection-start-line="251" selection-start-column="5" selection-end-line="251" selection-end-column="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -61,6 +55,7 @@
       <find>qs_to_array</find>
       <find>$controller</find>
       <find>new Middle</find>
+      <find>var_du</find>
     </findStrings>
     <dirStrings>
       <dir>$PROJECT_DIR$</dir>
@@ -77,17 +72,17 @@
         <option value="$PROJECT_DIR$/plugins/oauth/OAuthServer.php" />
         <option value="$PROJECT_DIR$/plugins/oauth/JWT.php" />
         <option value="$PROJECT_DIR$/lib/HttpError.php" />
-        <option value="$PROJECT_DIR$/lib/Route.php" />
         <option value="$PROJECT_DIR$/plugins/oauth/OAuthPlugin.php" />
         <option value="$PROJECT_DIR$/lib/HttpResponse.php" />
-        <option value="$PROJECT_DIR$/lib/Routeable.php" />
-        <option value="$PROJECT_DIR$/lib/MiddlewareStack.php" />
-        <option value="$PROJECT_DIR$/lib/StackApp.php" />
-        <option value="$PROJECT_DIR$/lib/Router.php" />
         <option value="$PROJECT_DIR$/composer.json" />
         <option value="$PROJECT_DIR$/lib/FileBag.php" />
         <option value="$PROJECT_DIR$/lib/FileRequest.php" />
         <option value="$PROJECT_DIR$/lib/HttpRequest.php" />
+        <option value="$PROJECT_DIR$/lib/Route.php" />
+        <option value="$PROJECT_DIR$/lib/Router.php" />
+        <option value="$PROJECT_DIR$/lib/StackApp.php" />
+        <option value="$PROJECT_DIR$/lib/Routeable.php" />
+        <option value="$PROJECT_DIR$/lib/MiddlewareStack.php" />
       </list>
     </option>
   </component>
@@ -165,17 +160,18 @@
       <workItem from="1547269130596" duration="31000" />
       <workItem from="1547269186478" duration="8157000" />
       <workItem from="1547313377826" duration="3298000" />
+      <workItem from="1547521148598" duration="3432000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="48390000" />
+    <option name="totallyTimeSpent" value="51822000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="25" width="1368" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28863636" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2931818" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -235,45 +231,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Route.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" column="43" selection-start-line="10" selection-start-column="43" selection-end-line="10" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/plugins/oauth/OAuthPlugin.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="135">
           <caret line="51" column="5" lean-forward="true" selection-start-line="51" selection-start-column="5" selection-end-line="51" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/MiddlewareStack.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="388">
-          <caret line="97" column="77" lean-forward="true" selection-start-line="97" selection-start-column="77" selection-end-line="97" selection-end-column="77" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/StackApp.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="11" column="6" lean-forward="true" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Router.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="67" lean-forward="true" selection-start-line="67" selection-end-line="67" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Routeable.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="208">
-          <caret line="92" column="9" lean-forward="true" selection-start-line="92" selection-start-column="9" selection-end-line="92" selection-end-column="9" />
         </state>
       </provider>
     </entry>
@@ -298,10 +259,45 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Route.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/HttpRequest.php">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
-          <caret line="251" column="5" lean-forward="true" selection-start-line="251" selection-start-column="5" selection-end-line="251" selection-end-column="5" />
+          <caret line="251" column="5" selection-start-line="251" selection-start-column="5" selection-end-line="251" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/StackApp.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="250">
+          <caret line="22" column="5" lean-forward="true" selection-start-line="22" selection-start-column="5" selection-end-line="22" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Router.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="43" column="38" lean-forward="true" selection-start-line="43" selection-start-column="38" selection-end-line="43" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/MiddlewareStack.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="77" column="41" lean-forward="true" selection-start-line="77" selection-start-column="41" selection-end-line="77" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/Routeable.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="149">
+          <caret line="109" column="5" lean-forward="true" selection-start-line="109" selection-start-column="5" selection-end-line="109" selection-end-column="5" />
         </state>
       </provider>
     </entry>

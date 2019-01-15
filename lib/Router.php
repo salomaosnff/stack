@@ -25,7 +25,7 @@ class Router extends Routeable {
      * @return Route
      */
     public function route($url): Route {
-        $route = new Route($url);
+        $route = new Route($url, $this->controllers);
         $this->routes[] = $route;
         return $route;
     }
@@ -39,7 +39,6 @@ class Router extends Routeable {
     public function use (...$middlewares) {
         foreach ($middlewares as $middleware) {
             if ($middleware instanceof Router) {
-                $middleware->controllers = is_null($middleware->controllers) ? $this->controllers : $middleware->controllers;
                 $this->sub_routers[] = $middleware;
             }
             parent::use ($middleware);
