@@ -302,6 +302,9 @@ class HttpRequest {
         $data = $this->form($field_data);
         $file = FileRequest::fromBase64($data, $name);
 
+        if(! $file) {
+            throw new \Exception('invalid_base64_image');
+        }
         if($this->hasFile($name)) {
             throw new \Exception('file_already_exists');
         }

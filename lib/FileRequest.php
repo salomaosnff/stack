@@ -69,10 +69,13 @@ class FileRequest {
      *
      * @param string $base64
      * @param string $file_name
-     * @return FileRequest
+     * @return FileRequest|bool
      */
     public static function fromBase64(string $base64, string $file_name) {
         $parts = preg_split('@(,|:|;)@', $base64);
+
+        if(count($parts) < 2) return false;
+
         $content = base64_decode($parts[3]);
 
         return new self([
