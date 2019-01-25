@@ -15,6 +15,16 @@ class StackApp extends Router {
     static $stack_controllers = '';
 
     /**
+     * @var HttpRequest
+     */
+    static $request;
+
+    /**
+     * @var HttpResponse
+     */
+    static $response;
+
+    /**
      * @param string $controllers Base namespace for every controller in app
      */
     public function __construct ($controllers = '') {
@@ -28,8 +38,8 @@ class StackApp extends Router {
      * @return null
      */
     public function start() {
-        $request = HttpRequest::get_current();
-        $response = new HttpResponse;
+        $request = self::$request = HttpRequest::get_current();
+        $response = self::$response = new HttpResponse;
         $request->app = $this;
         
         try {
