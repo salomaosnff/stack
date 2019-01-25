@@ -19,6 +19,8 @@ class HttpRequest {
     public $remote_address = null;
     public $params = null;
     public $app = null;
+    public $oauth = null;
+    public $oauth_request = null;
 
     /**
      * Pass every header name to lowercase

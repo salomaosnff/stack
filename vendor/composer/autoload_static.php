@@ -26,6 +26,7 @@ class ComposerStaticInited37c699cad73baa980919786d80b889
     );
 
     public static $classMap = array (
+        'Stack\\Lib\\FileRequest' => __DIR__ . '/../..' . '/lib/FileRequest.php',
         'Stack\\Lib\\HttpError' => __DIR__ . '/../..' . '/lib/HttpError.php',
         'Stack\\Lib\\HttpRequest' => __DIR__ . '/../..' . '/lib/HttpRequest.php',
         'Stack\\Lib\\HttpResponse' => __DIR__ . '/../..' . '/lib/HttpResponse.php',

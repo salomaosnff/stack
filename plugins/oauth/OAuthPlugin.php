@@ -26,7 +26,7 @@ class OAuthPlugin {
         $this->server = new OAuthTokenServer($controller);
         $this->router =  new Router($baseUrl);
 
-        $app->use(function($req, $res) {
+        $app->use(function(HttpRequest $req) {
             $req->oauth = $this;
             $req->oauth_request = new OAuthRequest($req);
         });

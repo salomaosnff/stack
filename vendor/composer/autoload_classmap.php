@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Stack\\Lib\\FileRequest' => $baseDir . '/lib/FileRequest.php',
     'Stack\\Lib\\HttpError' => $baseDir . '/lib/HttpError.php',
     'Stack\\Lib\\HttpRequest' => $baseDir . '/lib/HttpRequest.php',
     'Stack\\Lib\\HttpResponse' => $baseDir . '/lib/HttpResponse.php',

@@ -51,40 +51,98 @@ class MiddlewareStack {
      * @return HttpResponse|null
      * @throws \ReflectionException
      */
-    public function next (&$req, &$res, $err = null) {
+    public function next (HttpRequest &$req, HttpResponse &$res, $err = null) {
         if (count($this->stack) <= 0) {
             return $err;
         };
-        
+
         $middleware = array_shift($this->stack);
         $middleware = Routeable::normalize_method($middleware, $this->controllers);
 
         $reflex = null;
+        $instance = null;
         
         if (is_callable($middleware, true)) {
 
             if(is_string($middleware) && preg_match('/::/', $middleware)) {
+                // Middleware is a method
+
                 $method = explode('::', $middleware);
                 $reflex = new \ReflectionMethod($method[0], $method[1]);
+
+                $class_reflex = new \ReflectionClass($reflex->class);
+                $class_constructor = $class_reflex->getConstructor();
+
+                // Method class has no constructor
+                if($class_constructor === null) {
+
+                    // Create instance if method is a non static method
+                    if(! $reflex->isStatic()) {
+                        $instance = $class_reflex->newInstanceWithoutConstructor();
+                    }
+                } else {
+                    $class_args = $class_constructor->getNumberOfParameters();
+
+                    if($class_args === 2) {
+                        $instance = $class_reflex->newInstance($req, $res);
+                    }
+
+                    // If method is a non static method and have no instance, create one
+                    if(!$reflex->isStatic() && !$instance) {
+                        $instance = $class_reflex->newInstance();
+                    }
+                }
             } else {
+                // Anonymous function
                 $reflex = new \ReflectionFunction($middleware);
             }
 
             $args_len = $reflex->getNumberOfParameters();
 
+            // Return the response if have
             if ($err instanceof HttpResponse) return $err;
 
-            if($err === null && $args_len === 1) {
-                $err = $middleware($req);
+            // Is a regular middleware function
+            if($err === null) {
+
+                $params = $req->params;
+                $reflex_params = $reflex->getParameters();
+                $args = [];
+
+                foreach ($reflex_params as $ref_param) {
+                    $name = $ref_param->getName();
+                    $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : null;
+
+                    if(($type_name && $type_name === HttpRequest::class) ||
+                        in_array($name, ['req', 'request'])
+                    ) {
+                        $args[] = $req;
+                    }
+                    else if(($type_name && $type_name === HttpResponse::class) ||
+                        in_array($name, ['res', 'response'])
+                    ) {
+                        $args[] = $res;
+                    }
+                    else if(isset($params[$name])) {
+                        $args[] = $params[$name];
+                    }
+                    else {
+                        $args[] = null;
+                    }
+                }
+
+                // Invoke function
+                if($reflex instanceof \ReflectionFunction) {
+                    $err = $middleware(...$args);
+                } else {
+                    $err = $reflex->invokeArgs($instance, $args);
+                }
+
                 return $this->next($req, $res, $err);
             }
 
-            if ($err === null && $args_len === 2) {
-                $err = $middleware($req, $res);
-                return $this->next($req, $res, $err);
-            }
-
-            if ($err !== null && $args_len === 3) {
+            // Is a function for error parsing
+            else if($args_len === 3 && ($reflex instanceof \ReflectionFunction || $reflex->isStatic())) {
                 $err = $middleware($err, $req, $res);
                 return $this->next($req, $res, $err);
             }
