@@ -83,7 +83,10 @@ class MiddlewareStack {
                 } else {
                     $class_args = $class_constructor->getNumberOfParameters();
 
-                    if($class_args === 2) {
+                    if($class_args === 1) {
+                        $instance = $class_reflex->newInstance($req);
+                    }
+                    else if($class_args === 2) {
                         $instance = $class_reflex->newInstance($req, $res);
                     }
 
@@ -110,17 +113,13 @@ class MiddlewareStack {
                 $args = [];
 
                 foreach ($reflex_params as $ref_param) {
-                    $name = $ref_param->getName();
+                    $name = strtolower($ref_param->getName());
                     $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : null;
 
-                    if(($type_name && $type_name === HttpRequest::class) ||
-                        in_array($name, ['req', 'request'])
-                    ) {
+                    if($type_name && $type_name === HttpRequest::class) {
                         $args[] = $req;
                     }
-                    else if(($type_name && $type_name === HttpResponse::class) ||
-                        in_array($name, ['res', 'response'])
-                    ) {
+                    else if($type_name && $type_name === HttpResponse::class) {
                         $args[] = $res;
                     }
                     else if(isset($params[$name])) {
