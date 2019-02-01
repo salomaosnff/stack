@@ -21,6 +21,11 @@ class MiddlewareStack {
     public $controllers = '';
 
     /**
+     * @var callable
+     */
+    private $lastRouter;
+
+    /**
      * Validate exception or null
      *
      * @param $v
@@ -114,12 +119,12 @@ class MiddlewareStack {
 
                 foreach ($reflex_params as $ref_param) {
                     $name = strtolower($ref_param->getName());
-                    $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : null;
+                    $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : '';
 
-                    if($type_name && $type_name === HttpRequest::class) {
+                    if($type_name === HttpRequest::class) {
                         $args[] = $req;
                     }
-                    else if($type_name && $type_name === HttpResponse::class) {
+                    else if($type_name === HttpResponse::class) {
                         $args[] = $res;
                     }
                     else if(isset($params[$name])) {
@@ -136,19 +141,16 @@ class MiddlewareStack {
                 } else {
                     $err = $reflex->invokeArgs($instance, $args);
                 }
-
-                return $this->next($req, $res, $err);
             }
 
             // Is a function for error parsing
             else if($args_len === 3 && ($reflex instanceof \ReflectionFunction || $reflex->isStatic())) {
                 $err = $middleware($err, $req, $res);
-                return $this->next($req, $res, $err);
             }
         } else if ($middleware instanceof self) {
             $err = $middleware->next($req, $res, $err);
         }
-        
+
         return $this->next($req, $res, $err);
     }
 

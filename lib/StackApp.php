@@ -38,9 +38,12 @@ class StackApp extends Router {
      * @return null
      */
     public function start() {
-        $request = self::$request = HttpRequest::get_current();
-        $response = self::$response = new HttpResponse;
-        $request->app = $this;
+        self::$request = HttpRequest::get_current();
+        self::$response = new HttpResponse();
+
+        $request = &self::$request;
+        $response = &self::$response;
+        $request->app = &$this;
         
         try {
             $res = $this->init($request, $response);
@@ -71,7 +74,6 @@ class StackApp extends Router {
         }
         
         $response->end();
-
         return null;
     }
 }

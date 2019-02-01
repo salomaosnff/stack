@@ -13,7 +13,11 @@ abstract class Routeable {
     public $params = [];
     public $controllers = '';
 
+    /**
+     * @var MiddlewareStack
+     */
     private $stack_global;
+
     private $stack_methods = [];
 
     /**

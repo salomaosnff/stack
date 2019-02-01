@@ -34,7 +34,6 @@ class HttpResponse {
      */
     public function status(int $code) {
         $this->status = max(0, min(599, $code));
-
         return $this;
     }
 
@@ -131,22 +130,20 @@ class HttpResponse {
     public function error(\Exception $error, $info = null, $status = 200) {
         if ($error instanceof HttpError) {
             $status = $error->getCode();
-            $info = $error->info ?? $info;
+            $info = $info ?? $error->info;
         } else if ($error instanceof \Exception) {
             $error = new HttpError(HttpError::INTERNAL_SERVER_ERROR, [
                 'error' => $error->getMessage(),
                 'code' => $error->getCode()
             ]);
+            $status = $error->getCode();
         }
 
-        return $this
-            ->status($status)
-            ->json([
-                'message' => $error->getMessage(),
-                'code' => $error->getCode(),
-                'info' => $error->info ?? $info
-            ])
-            ;
+        return $this->json([
+            'message' => $error->getMessage(),
+            'code' => $error->getCode(),
+            'info' => $info ?? $error->info
+        ], $status);
     }
 
     /**
@@ -159,5 +156,18 @@ class HttpResponse {
         $this->status = null;
         if ($die) die($this->body);
         echo $this->body;
+    }
+
+    /**
+     * Dies with an immediate error
+     *
+     * @param \Exception $error
+     * @param null $info
+     * @param int $status
+     */
+    public static function _throw(\Exception $error, $info = null, $status = 500) {
+        ob_clean();
+        $response = new self;
+        $response->error($error, $info, $status)->end(true);
     }
 }
