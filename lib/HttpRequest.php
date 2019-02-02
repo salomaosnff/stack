@@ -12,7 +12,7 @@ class HttpRequest {
     public $original_url = null;
     public $query = [];
     public $query_string = null;
-    public $body = null;
+    public $body = [];
     public $raw_body = null;
     public $files = [];
     public $headers = null;
@@ -77,11 +77,11 @@ class HttpRequest {
         }, $_FILES);
 
         if ($req->is('json')) {
-            $req->body = \json_decode($req->raw_body, true);
+            $req->body = (array) \json_decode($req->raw_body, true);
         } else if ($req->is('x-www-form-urlencoded')) {
-            $req->body = self::qs_to_array($req->raw_body);
+            $req->body = (array) self::qs_to_array($req->raw_body);
         } else if ($req->is('multipart/form-data')) {
-            $req->body = $_POST;
+            $req->body = (array) \json_decode(json_encode($_POST), true);
         }
 
         return $req;
