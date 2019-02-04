@@ -7,20 +7,21 @@ namespace Stack\Lib;
  */
 class HttpRequest {
 
-    public $method = null;
-    public $url = null;
-    public $original_url = null;
+    public $method = '';
+    public $url = '';
+    public $original_url = '';
     public $query = [];
-    public $query_string = null;
+    public $query_string = '';
     public $body = [];
-    public $raw_body = null;
+    public $raw_body = '';
     public $files = [];
-    public $headers = null;
+    public $headers = [];
     public $remote_address = null;
-    public $params = null;
+    public $params = [];
     public $app = null;
     public $oauth = null;
     public $oauth_request = null;
+    public $auth = null;
 
     /**
      * Pass every header name to lowercase
