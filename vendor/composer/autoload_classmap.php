@@ -16,8 +16,8 @@ return array(
     'Stack\\Lib\\Router' => $baseDir . '/lib/Router.php',
     'Stack\\Lib\\StackApp' => $baseDir . '/lib/StackApp.php',
     'Stack\\Plugins\\OAuth\\JWT' => $baseDir . '/plugins/oauth/JWT.php',
-    'Stack\\Plugins\\OAuth\\OAuthControllerInterface' => $baseDir . '/plugins/oauth/OAuthControllerInterface.php',
+    'Stack\\Plugins\\OAuth\\OAuthController' => $baseDir . '/plugins/oauth/OAuthController.php',
     'Stack\\Plugins\\OAuth\\OAuthPlugin' => $baseDir . '/plugins/oauth/OAuthPlugin.php',
     'Stack\\Plugins\\OAuth\\OAuthRequest' => $baseDir . '/plugins/oauth/OAuthRequest.php',
-    'Stack\\Plugins\\OAuth\\OAuthTokenServer' => $baseDir . '/plugins/oauth/OAuthServer.php',
+    'Stack\\Plugins\\OAuth\\OAuthTokenServer' => $baseDir . '/plugins/oauth/OAuthTokenServer.php',
 );

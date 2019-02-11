@@ -21,9 +21,15 @@ class OAuthPlugin {
      * @param Routeable $app
      * @param string $controller
      * @param string $baseUrl
+     * @param array $server_options Options for auth server
      */
-    public function __construct (Routeable $app, string $controller, string $baseUrl = '/oauth') {
-        $this->server = new OAuthTokenServer($controller);
+    public function __construct (
+        Routeable $app,
+        string $controller,
+        string $baseUrl = '/oauth',
+        array $server_options = []
+    ) {
+        $this->server = new OAuthTokenServer($controller, $server_options);
         $this->router =  new Router($baseUrl);
 
         $app->use(function(HttpRequest $req) {
@@ -34,6 +40,11 @@ class OAuthPlugin {
         $this->router->route('/token')
             ->post(function(HttpRequest $request, HttpResponse $response) {
                 return $this->server->server($request, $response);
+            });
+
+        $this->router->route('/token/revoke')
+            ->delete(function(HttpRequest $req, HttpResponse $res) {
+                return $this->server->revoke($req, $res);
             });
 
         $app->use($this->router);

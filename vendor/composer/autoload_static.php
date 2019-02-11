@@ -36,10 +36,10 @@ class ComposerStaticInited37c699cad73baa980919786d80b889
         'Stack\\Lib\\Router' => __DIR__ . '/../..' . '/lib/Router.php',
         'Stack\\Lib\\StackApp' => __DIR__ . '/../..' . '/lib/StackApp.php',
         'Stack\\Plugins\\OAuth\\JWT' => __DIR__ . '/../..' . '/plugins/oauth/JWT.php',
-        'Stack\\Plugins\\OAuth\\OAuthControllerInterface' => __DIR__ . '/../..' . '/plugins/oauth/OAuthControllerInterface.php',
+        'Stack\\Plugins\\OAuth\\OAuthController' => __DIR__ . '/../..' . '/plugins/oauth/OAuthController.php',
         'Stack\\Plugins\\OAuth\\OAuthPlugin' => __DIR__ . '/../..' . '/plugins/oauth/OAuthPlugin.php',
         'Stack\\Plugins\\OAuth\\OAuthRequest' => __DIR__ . '/../..' . '/plugins/oauth/OAuthRequest.php',
-        'Stack\\Plugins\\OAuth\\OAuthTokenServer' => __DIR__ . '/../..' . '/plugins/oauth/OAuthServer.php',
+        'Stack\\Plugins\\OAuth\\OAuthTokenServer' => __DIR__ . '/../..' . '/plugins/oauth/OAuthTokenServer.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

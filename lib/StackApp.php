@@ -65,14 +65,14 @@ class StackApp extends Router {
                 throw $res;
             }
 
-            if (!($res instanceof HttpResponse)) {
+            if (!($res instanceof HttpResponse) && $res !== true) {
                 throw new HttpError(HttpError::INTERNAL_SERVER_ERROR, $res);
             }
             
         } catch (\Exception $error) {
             $response->error($error);
         }
-        
+
         $response->end();
         return null;
     }

@@ -12,6 +12,7 @@ class HttpResponse {
     public $body = '';
     public $locals = [];
     public $app;
+    public $finished = false;
 
     /**
      * Add headers to response
@@ -156,6 +157,16 @@ class HttpResponse {
         $this->status = null;
         if ($die) die($this->body);
         echo $this->body;
+    }
+
+    /**
+     * Finish stack
+     *
+     * @return $this
+     */
+    public function finish() {
+        $this->finished = true;
+        return $this;
     }
 
     /**

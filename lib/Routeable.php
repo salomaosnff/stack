@@ -244,6 +244,16 @@ abstract class Routeable {
     }
 
     /**
+     * Register OPTIONS method
+     *
+     * @param string|callable ...$middlewares
+     * @return Routeable
+     */
+    public function options(...$middlewares): Routeable {
+        return $this->register_method('OPTIONS', $middlewares);
+    }
+
+    /**
      * Init
      *
      * @param HttpRequest $request

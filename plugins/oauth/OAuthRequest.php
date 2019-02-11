@@ -12,30 +12,23 @@ class OAuthRequest {
 
     public $authorization = null;
     public $grant_type = null;
+    public $client = null;
     public $username = null;
     public $password = null;
     public $refresh_token = null;
-    public $client = null;
     public $token_payload = null;
+    public $form = [];
 
     /**
-     * @param HttpRequest $request
+     * @param HttpRequest $req
      * @throws HttpError
      */
-    public function __construct(HttpRequest $request) {
-        $authorization = isset($request->headers['authorization']) ? $request->headers['authorization'] : '';
+    public function __construct(HttpRequest $req) {
+        $authorization = $req->headers['authorization'] ?? '';
 
         $this->authorization = preg_replace('@^\s*B(earer|asic)|\s*@', '', $authorization);
-        $this->form = (object) $request->body;
-        $this->grant_type = isset($this->form->grant_type) ? $this->form->grant_type : null;
-
-        $is_bearer = preg_match('@^Bearer @', $authorization);
-
-        if ($is_bearer) {
-            $this->token_payload = JWT::decode($this->authorization);
-            $this->token_payload->scopes = $this->token_payload->scopes ?? [];
-            return $this;
-        }
+        $this->form = (object) $req->body;
+        $this->grant_type = $this->form->grant_type ?? null;
 
         if (in_array($this->grant_type, ['password', 'refresh_token'])) {
             $this->client = $this->getClientCredentials();
@@ -46,7 +39,7 @@ class OAuthRequest {
             $this->password = \filter_var($this->form->password, \FILTER_SANITIZE_STRING);
 
             if (empty($this->username) || empty($this->password)) {
-                throw new HttpError(HttpError::BAD_REQUEST, ['code' => 'missing_credentials']);
+                throw new HttpError(HttpError::BAD_REQUEST, 'missing_credentials');
             }
         }
 
@@ -54,7 +47,7 @@ class OAuthRequest {
             $this->refresh_token = $this->form->refresh_token;
 
             if (empty($this->refresh_token)) {
-                throw new HttpError(HttpError::BAD_REQUEST, ['code' => 'missing_refresh_token']);
+                throw new HttpError(HttpError::BAD_REQUEST, 'missing_refresh_token');
             }
         }
     }
@@ -67,7 +60,6 @@ class OAuthRequest {
     private function getClientCredentials() {
         $credentials = base64_decode($this->authorization);
         @list($id, $secret) = explode(":", $credentials);
-
         return (object) [
             'id' => $id,
             'secret' => $secret,
