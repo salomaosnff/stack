@@ -263,11 +263,12 @@ abstract class Routeable {
      */
     public function init(
         HttpRequest &$request,
-        HttpResponse &$response
+        HttpResponse &$response,
+        $err = null
     ) {
-        $global = $this->stack_global->next($request, $response);
+        $global = $this->stack_global->next($request, $response, $err);
 
-        if ($global instanceof HttpResponse || !is_null($global)) {
+        if (!is_null($global)) {
             return $global;
         }
 

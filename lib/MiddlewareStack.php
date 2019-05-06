@@ -68,7 +68,6 @@ class MiddlewareStack {
         $instance = null;
         
         if (is_callable($middleware, true)) {
-
             if(is_string($middleware) && preg_match('/::/', $middleware)) {
                 // Middleware is a method
 
@@ -110,42 +109,51 @@ class MiddlewareStack {
             // Return the response if have
             if ($err instanceof HttpResponse) return $err;
 
-            // Is a regular middleware function
-            if($err === null) {
+            $params = $req->params ?? [];
+            $reflex_params = $reflex->getParameters();
+            $args = [];
+            $error_func = false;
 
-                $params = $req->params;
-                $reflex_params = $reflex->getParameters();
-                $args = [];
+            foreach ($reflex_params as $ref_param) {
+                $name = strtolower($ref_param->getName());
+                $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : '';
 
-                foreach ($reflex_params as $ref_param) {
-                    $name = strtolower($ref_param->getName());
-                    $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : '';
-
-                    if($type_name === HttpRequest::class) {
-                        $args[] = $req;
-                    }
-                    else if($type_name === HttpResponse::class) {
-                        $args[] = $res;
-                    }
-                    else if(isset($params[$name])) {
-                        $args[] = $params[$name];
-                    }
-                    else {
-                        $args[] = null;
-                    }
+                if($type_name === HttpRequest::class) {
+                    $args[] = $req;
                 }
-
-                // Invoke function
-                if($reflex instanceof \ReflectionFunction) {
-                    $err = $middleware(...$args);
-                } else {
-                    $err = $reflex->invokeArgs($instance, $args);
+                else if($type_name === HttpResponse::class) {
+                    $args[] = $res;
+                }
+                else if($type_name === \Exception::class) {
+                    $args[] = $err;
+                    $error_func = true;
+                }
+                else if(isset($params[$name])) {
+                    $args[] = $params[$name];
+                }
+                else {
+                    $args[] = null;
                 }
             }
 
-            // Is a function for error parsing
-            else if($args_len === 3 && ($reflex instanceof \ReflectionFunction || $reflex->isStatic())) {
-                $err = $middleware($err, $req, $res);
+            // Invoke normal or error function
+            try {
+                if($error_func && !is_null($err)) {
+                    if($reflex instanceof \ReflectionFunction) {
+                        $err = $middleware(...$args);
+                    } else {
+                        $err = $reflex->invokeArgs($instance, $args);
+                    }
+                } else if(!$error_func && is_null($err)) {
+                    if($reflex instanceof \ReflectionFunction) {
+                        $err = $middleware(...$args);
+                    } else {
+                        $err = $reflex->invokeArgs($instance, $args);
+                    }
+                }
+            } catch(\Exception $ex) {
+                // Define error for the next function
+                $err = $ex;
             }
         } else if ($middleware instanceof self) {
             $err = $middleware->next($req, $res, $err);

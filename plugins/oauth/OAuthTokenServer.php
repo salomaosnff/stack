@@ -78,6 +78,9 @@ class OAuthTokenServer {
      */
     public function __call($name, $arguments) {
         if(! \method_exists($this->controller, $name)) {
+            if(in_array($name, ['saveAccessToken'])) {
+                return true;
+            }
             throw new \Exception('invalid_oauth_method_call');
         }
         return call_user_func_array([$this->controller, $name], $arguments);
@@ -177,12 +180,9 @@ class OAuthTokenServer {
          */
         $expires_at = $payload->refresh_token_exp;
         $token_expired = $expires_at <= time();
-        $expired_time = time() - $expires_at;
 
         // Verifies that the refresh token is expired and out of tolerance
-        if($expires_at >= 0 && $token_expired &&
-            $expired_time > $this->option('refresh_token_exp_tolerance')
-        ) {
+        if($expires_at >= 0 && $token_expired) {
             return new HttpError(HttpError::UNAUTHORIZED, 'refresh_token_expired');
         }
 

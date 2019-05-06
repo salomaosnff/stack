@@ -59,26 +59,28 @@ class Router extends Routeable {
             return null;
         }
 
-        $res = parent::init($request, $response);
-
-        if (!MiddlewareStack::__check_value($res)) {
-            return $res;
-        }
-
         foreach ($this->sub_routers as $router) {
-            $res = $router->init($request, $response);
-            if (!is_null($res) && $res) {
+            $res = $router->init($request, $response, $err);
+            if($res instanceof \Exception) {
+                $err = $res;
+            } else if (!is_null($res)) {
                 return $res;
             }
-
         }
 
         foreach ($this->routes as $route) {
-            $res = $route->init($request, $response);
-            if (!is_null($res) && $res) {
+            $res = $route->init($request, $response, $err);
+            if($res instanceof \Exception) {
+                $err = $res;
+            } else if (!is_null($res)) {
                 return $res;
             }
+        }
 
+        $res = parent::init($request, $response, $err);
+
+        if (!MiddlewareStack::__check_value($res)) {
+            return $res;
         }
 
         return null;

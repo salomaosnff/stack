@@ -11,8 +11,8 @@ class Route extends Routeable {
         parent::__construct($url, 'route', $controllers);
     }
 
-    public function init (HttpRequest &$request, HttpResponse &$response) {
-        if (!$this->test($request, false)) return false;
-        return parent::init($request, $response);
+    public function init (HttpRequest &$request, HttpResponse &$response, $err = null) {
+        if (!$this->test($request, false)) return null;
+        return parent::init($request, $response, $err);
     }
 }
