@@ -31,11 +31,9 @@ class HttpRequest {
      */
     private static function normalizeHeaders($headers) {
         $result = [];
-
         foreach ($headers as $name => $value) {
             $result[strtolower($name)] = $value;
         }
-
         return $result;
     }
 
@@ -49,7 +47,7 @@ class HttpRequest {
         ? filter_input(\INPUT_GET, '$route', \FILTER_SANITIZE_STRING)
         : $_SERVER['REQUEST_URI']
         ;
-        $url = Routeable::normalize_url('/', $url);
+        $url = normalize_url('/', $url);
 
         $req = new self;
 

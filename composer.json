@@ -1,23 +1,23 @@
 {
-    "name": "sallon/stack",
-    "description": "Sistema de roteamento em PHP",
-    "type": "library",
-    "version": "0.0.1",
-    "minimum-stability": "dev",
-    "authors": [
-        {
-            "name": "Salomão Neto",
-            "email": "salomaosnff3@gmail.com"
-        }
-    ],
-    "require": {
-        "php": "^7.0",
-        "ext-json": "*"
-    },
-    "autoload": {
-        "psr-4": {
-            "Stack\\Lib\\": "lib/",
-            "Stack\\Plugins\\": "plugins/"
-        }
+  "name": "sallon/stack",
+  "description": "Sistema de roteamento em PHP",
+  "type": "library",
+  "version": "0.0.1",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "Salomão Neto",
+      "email": "salomaosnff3@gmail.com"
     }
+  ],
+  "require": {
+    "php": "^7.0",
+    "ext-json": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Stack\\Lib\\": "lib/",
+      "Stack\\Plugins\\": "plugins/"
+    }
+  }
 }

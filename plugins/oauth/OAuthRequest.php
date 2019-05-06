@@ -1,7 +1,7 @@
 <?php
 namespace Stack\Plugins\OAuth;
 
-use Stack\Lib\HttpError;
+use Stack\Lib\HttpException;
 use Stack\Lib\HttpRequest;
 
 /**
@@ -21,7 +21,7 @@ class OAuthRequest {
 
     /**
      * @param HttpRequest $req
-     * @throws HttpError
+     * @throws HttpException
      */
     public function __construct(HttpRequest $req) {
         $authorization = $req->headers['authorization'] ?? '';
@@ -39,7 +39,7 @@ class OAuthRequest {
             $this->password = \filter_var($this->form->password, \FILTER_SANITIZE_STRING);
 
             if (empty($this->username) || empty($this->password)) {
-                throw new HttpError(HttpError::BAD_REQUEST, 'missing_credentials');
+                throw new HttpException(HttpException::BAD_REQUEST, 'missing_credentials');
             }
         }
 
@@ -47,7 +47,7 @@ class OAuthRequest {
             $this->refresh_token = $this->form->refresh_token;
 
             if (empty($this->refresh_token)) {
-                throw new HttpError(HttpError::BAD_REQUEST, 'missing_refresh_token');
+                throw new HttpException(HttpException::BAD_REQUEST, 'missing_refresh_token');
             }
         }
     }

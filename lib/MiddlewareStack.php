@@ -1,6 +1,8 @@
 <?php
-
 namespace Stack\Lib;
+
+use Stack\Lib\HttpRequest;
+use Stack\Lib\HttpResponse;
 
 /**
  * Class MiddlewareStack
@@ -18,32 +20,26 @@ class MiddlewareStack {
      *
      * @var string
      */
-    public $controllers = '';
+    public $_controllers = '';
 
     /**
-     * @var callable
+     * Parent router
+     * 
+     * @var null|Router|Route
      */
-    private $lastRouter;
-
-    /**
-     * Validate exception or null
-     *
-     * @param $v
-     * @return bool
-     */
-    public static function __check_value ($v) {
-        return is_null($v) || $v instanceof HttpResponse;
-    }
+    public $parent;
 
     /**
      * Registra middlewares na stack
      *
-     * @param callable|Routeable|array $middlewares Lista de middlewares
+     * @param callable|Router|Route|array $middlewares Lista de middlewares
      * @return MiddlewareStack
      */
     public function use(...$middlewares) {
         $middlewares = array_filter($middlewares, function($middleware) {
-            return is_callable($middleware, true) || ($middleware instanceof self) || ($middleware instanceof Router);
+            return is_callable($middleware, true) || ($middleware instanceof self) || 
+                ($middleware instanceof Router) || ($middleware instanceof Route)
+            ;
         });
         $this->stack = array_merge($this->stack, $middlewares);
         return $this;
@@ -56,13 +52,18 @@ class MiddlewareStack {
      * @return HttpResponse|null
      * @throws \ReflectionException
      */
-    public function next (HttpRequest &$req, HttpResponse &$res, $err = null) {
+    public function next(HttpRequest &$req, HttpResponse &$res, $out = null) {
         if (count($this->stack) <= 0) {
-            return $err;
+            return $out;
         };
 
+        // Return the output if have one
+        if(!is_null($out) && !($out instanceof \Exception)) {
+            return $out;
+        }
+        
         $middleware = array_shift($this->stack);
-        $middleware = Routeable::normalize_method($middleware, $this->controllers);
+        $middleware = normalize_method($middleware, $this->controllers);
 
         $reflex = null;
         $instance = null;
@@ -106,13 +107,10 @@ class MiddlewareStack {
 
             $args_len = $reflex->getNumberOfParameters();
 
-            // Return the response if have
-            if ($err instanceof HttpResponse) return $err;
-
             $params = $req->params ?? [];
             $reflex_params = $reflex->getParameters();
             $args = [];
-            $error_func = false;
+            $error_func = null;
 
             foreach ($reflex_params as $ref_param) {
                 $name = strtolower($ref_param->getName());
@@ -124,9 +122,11 @@ class MiddlewareStack {
                 else if($type_name === HttpResponse::class) {
                     $args[] = $res;
                 }
-                else if($type_name === \Exception::class) {
-                    $args[] = $err;
-                    $error_func = true;
+                else if($type_name === \Exception::class || 
+                    is_subclass_of($type_name, \Exception::class)
+                ) {
+                    $args[] = $out;
+                    $error_func = $type_name;
                 }
                 else if(isset($params[$name])) {
                     $args[] = $params[$name];
@@ -138,39 +138,46 @@ class MiddlewareStack {
 
             // Invoke normal or error function
             try {
-                if($error_func && !is_null($err)) {
+                if((!is_null($error_func) &&
+                    ($out instanceof \Exception && 
+                    $error_func === get_class($out))) ||
+                    (is_null($error_func) && !($out instanceof \Exception))
+                ) {
                     if($reflex instanceof \ReflectionFunction) {
-                        $err = $middleware(...$args);
+                        $out = $middleware(...$args);
                     } else {
-                        $err = $reflex->invokeArgs($instance, $args);
-                    }
-                } else if(!$error_func && is_null($err)) {
-                    if($reflex instanceof \ReflectionFunction) {
-                        $err = $middleware(...$args);
-                    } else {
-                        $err = $reflex->invokeArgs($instance, $args);
+                        $out = $reflex->invokeArgs($instance, $args);
                     }
                 }
             } catch(\Exception $ex) {
                 // Define error for the next function
-                $err = $ex;
+                $out = $ex;
             }
         } else if ($middleware instanceof self) {
-            $err = $middleware->next($req, $res, $err);
+            $out = $middleware->next($req, $res, $out);
+        } else if (($middleware instanceof Router || $middleware instanceof Route) &&
+            !($out instanceof \Exception)
+        ) {
+            $out = $middleware->dispatch($req, $res);
         }
 
-        return $this->next($req, $res, $err);
+        return $this->next($req, $res, $out);
+    }
+
+    public function __get($prop) {
+        if($prop === 'controllers') {
+            if(!\is_null($this->parent)) {
+                return $this->parent->controllers;
+            }
+            return '';
+        }
     }
 
     /**
      * @param string $controllers Controllers sub namespace
+     * @param null|Router|Route $parent Parent router
      */
-    public function __construct($controllers = '') {
-        $baseNamespace = trim(StackApp::$stack_controllers, '\\');
-        if(substr($controllers, 0, 1) === '\\') {
-            $baseNamespace = '';
-        }
-        $controllers = trim($controllers, '\\');
-        $this->controllers = '\\' . trim($baseNamespace . '\\' . $controllers, '\\');
+    public function __construct($parent = null) {
+        $this->parent = $parent;
     }
 }

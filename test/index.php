@@ -4,7 +4,7 @@ require '../vendor/autoload.php';
 use Stack\Lib\{
     Route,
     Router,
-    HttpError,
+    HttpException,
     HttpRequest,
     HttpResponse
 };

@@ -1,7 +1,7 @@
 <?php
 namespace Stack\Plugins\OAuth;
 
-use Stack\Lib\HttpError;
+use Stack\Lib\HttpException;
 use Stack\Lib\HttpRequest;
 use Stack\Lib\HttpResponse;
 use Stack\Lib\Routeable;
@@ -68,16 +68,16 @@ class OAuthPlugin {
      * @param HttpRequest $req
      * @param HttpResponse $res
      * @param array $scopes
-     * @return HttpError
+     * @return HttpException
      */
     public static function authRequest(HttpRequest $req, HttpResponse $res, array $scopes = []) {
         if(! isset($req->oauth)) {
-            return new HttpError(HttpError::INTERNAL_SERVER_ERROR, 'oauth_plugin_not_started');
+            return new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'oauth_plugin_not_started');
         }
         return $req->oauth->server->session($req, $res);
 
 //            if (!$req->oauth_request->hasScope(...$scopes)) {
-//                return new HttpError(HttpError::FORBIDDEN, 'Insufficient permissions!');
+//                return new HttpException(HttpException::FORBIDDEN, 'Insufficient permissions!');
 //            }
     }
 }

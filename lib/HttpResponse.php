@@ -129,11 +129,11 @@ class HttpResponse {
      * @return HttpResponse
      */
     public function error(\Exception $error, $info = null, $status = 200) {
-        if ($error instanceof HttpError) {
+        if ($error instanceof HttpException) {
             $status = $error->getCode();
             $info = $info ?? $error->info;
         } else if ($error instanceof \Exception) {
-            $error = new HttpError(HttpError::INTERNAL_SERVER_ERROR, [
+            $error = new HttpException(HttpException::INTERNAL_SERVER_ERROR, [
                 'error' => $error->getMessage(),
                 'code' => $error->getCode()
             ]);

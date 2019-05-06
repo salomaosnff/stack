@@ -6,7 +6,7 @@ namespace Stack\Lib;
  *
  * @package Stack\Lib
  */
-class HttpError extends \Exception implements \Throwable {
+class HttpException extends \Exception implements \Throwable {
 
     const BAD_REQUEST           = [400, 'Bad Request'];
     const UNAUTHORIZED          = [401, 'Unauthorized'];

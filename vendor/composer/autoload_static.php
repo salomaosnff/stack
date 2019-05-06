@@ -27,14 +27,13 @@ class ComposerStaticInited37c699cad73baa980919786d80b889
 
     public static $classMap = array (
         'Stack\\Lib\\FileRequest' => __DIR__ . '/../..' . '/lib/FileRequest.php',
-        'Stack\\Lib\\HttpError' => __DIR__ . '/../..' . '/lib/HttpError.php',
+        'Stack\\Lib\\HttpException' => __DIR__ . '/../..' . '/lib/HttpException.php',
         'Stack\\Lib\\HttpRequest' => __DIR__ . '/../..' . '/lib/HttpRequest.php',
         'Stack\\Lib\\HttpResponse' => __DIR__ . '/../..' . '/lib/HttpResponse.php',
         'Stack\\Lib\\MiddlewareStack' => __DIR__ . '/../..' . '/lib/MiddlewareStack.php',
         'Stack\\Lib\\Route' => __DIR__ . '/../..' . '/lib/Route.php',
-        'Stack\\Lib\\Routeable' => __DIR__ . '/../..' . '/lib/Routeable.php',
         'Stack\\Lib\\Router' => __DIR__ . '/../..' . '/lib/Router.php',
-        'Stack\\Lib\\StackApp' => __DIR__ . '/../..' . '/lib/StackApp.php',
+        'Stack\\Lib\\Stack' => __DIR__ . '/../..' . '/lib/Stack.php',
         'Stack\\Plugins\\OAuth\\JWT' => __DIR__ . '/../..' . '/plugins/oauth/JWT.php',
         'Stack\\Plugins\\OAuth\\OAuthController' => __DIR__ . '/../..' . '/plugins/oauth/OAuthController.php',
         'Stack\\Plugins\\OAuth\\OAuthPlugin' => __DIR__ . '/../..' . '/plugins/oauth/OAuthPlugin.php',

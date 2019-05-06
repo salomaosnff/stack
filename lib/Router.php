@@ -1,88 +1,78 @@
 <?php
 namespace Stack\Lib;
 
-/**
- * Class Router
- * @package Stack\Lib
- */
-class Router extends Routeable {
+use Stack\Lib\HttpRequest;
+use Stack\Lib\HttpResponse;
 
-    protected $routes = [];
-    protected $sub_routers = [];
+class Router {
 
-    /**
-     * @param string $url
-     * @param string $controllers Controllers sub namespace
-     */
-    public function __construct(string $url = '/', $controllers = '') {
-        parent::__construct($url, 'router', $controllers);
+  public $baseURL = '/';
+  public $_controllers = '';
+  public $parent = null;
+  public $regex = '@^/*$@';
+  public $params = [];
+  
+  /**
+   * @var MiddlewareStack
+   */
+  public $stack;
+
+  public function __construct(
+    $baseURL, 
+    $controllers = '',
+    ?MiddlewareStack $stack = null
+  ) {
+    $this->baseURL = normalize_url($baseURL);
+    $this->_controllers = $controllers;
+    $this->stack = $stack ?? new MiddlewareStack($this);
+    
+    $url = url_params($this->baseURL, false);
+    $this->regex = $url['regex'];
+    $this->params = $url['params'];
+  }
+
+  public function __get($prop) {
+    if($prop === 'controllers') {
+      if(!\is_null($this->parent)) {
+        return resolve_namespace($this->parent->controllers, $this->_controllers);
+      }
+      return $this->_controllers;
     }
+  }
 
-    /**
-     * Register new route url
-     *
-     * @param $url
-     * @return Route
-     */
-    public function route($url): Route {
-        $route = new Route($url, $this->controllers);
-        $this->routes[] = $route;
-        return $route;
+  /**
+   * Use a middlewire inside the router
+   * @param callable|Router ...$middlewares Middleware list
+   */
+  public function use(...$middlewares) {
+    foreach($middlewares as $mid) {
+      if($mid instanceof self || $mid instanceof Route) {
+        $mid->parent = $this;
+      }
     }
+    $this->stack->use(...$middlewares);
+    return $this;
+  }
 
-    /**
-     * Middleware registration
-     *
-     * @param mixed ...$middlewares
-     * @return Routeable|void
-     */
-    public function use (...$middlewares) {
-        foreach ($middlewares as $middleware) {
-            if ($middleware instanceof Router) {
-                $this->sub_routers[] = $middleware;
-            }
-            parent::use ($middleware);
-        }
-    }
+  /**
+   * Register new route url
+   *
+   * @param string $url Final path for routing method
+   * @param array $stack_methods Assoc. Array with methods and middlewares
+   * @example $route('/:id', ['GET' => [function() { ... }, function() { ... }]])
+   * @return Route
+   */
+  public function route($url, string $controllers = '', array $stack_methods = []): Route {
+    $route = new Route($url, $controllers, $stack_methods);
+    $this->use($route);
+    return $route;
+  }
 
-    /**
-     * Init all routes and sub-routes
-     *
-     * @param HttpRequest $request
-     * @param HttpResponse $response
-     * @param null $err
-     * @return HttpError|HttpResponse|null
-     * @throws \ReflectionException
-     */
-    public function init(HttpRequest &$request, HttpResponse &$response, $err = null) {
-        if (!$this->test($request, true)) {
-            return null;
-        }
-
-        foreach ($this->sub_routers as $router) {
-            $res = $router->init($request, $response, $err);
-            if($res instanceof \Exception) {
-                $err = $res;
-            } else if (!is_null($res)) {
-                return $res;
-            }
-        }
-
-        foreach ($this->routes as $route) {
-            $res = $route->init($request, $response, $err);
-            if($res instanceof \Exception) {
-                $err = $res;
-            } else if (!is_null($res)) {
-                return $res;
-            }
-        }
-
-        $res = parent::init($request, $response, $err);
-
-        if (!MiddlewareStack::__check_value($res)) {
-            return $res;
-        }
-
-        return null;
-    }
+  /**
+   * Dispath router middlewares
+   */
+  public function dispatch(HttpRequest $req, HttpResponse $res) {
+    if(!test_url($req, true, $this)) return null;
+    return $this->stack->next($req, $res);
+  }
 }
