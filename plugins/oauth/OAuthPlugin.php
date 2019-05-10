@@ -4,7 +4,6 @@ namespace Stack\Plugins\OAuth;
 use Stack\Lib\HttpException;
 use Stack\Lib\HttpRequest;
 use Stack\Lib\HttpResponse;
-use Stack\Lib\Routeable;
 use Stack\Lib\Router;
 
 /**
@@ -18,13 +17,13 @@ class OAuthPlugin {
     public $server;
 
     /**
-     * @param Routeable $app
+     * @param Router $app
      * @param string $controller
      * @param string $baseUrl
      * @param array $server_options Options for auth server
      */
     public function __construct (
-        Routeable $app,
+        Router $app,
         string $controller,
         string $baseUrl = '/oauth',
         array $server_options = []
@@ -38,8 +37,8 @@ class OAuthPlugin {
         });
 
         $this->router->route('/token')
-            ->post(function(HttpRequest $request, HttpResponse $response) {
-                return $this->server->server($request, $response);
+            ->post(function(HttpRequest $req, HttpResponse $res) {
+                return $this->server->server($req, $res);
             });
 
         $this->router->route('/token/revoke')
@@ -56,7 +55,7 @@ class OAuthPlugin {
      * @param mixed ...$scopes
      * @return \Closure
      */
-    public static function authenticate(...$scopes){
+    public static function auth(...$scopes){
         return function (HttpRequest $req, HttpResponse $res) use ($scopes) {
             return self::authRequest($req, $res, $scopes);
         };

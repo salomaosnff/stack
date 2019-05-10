@@ -25,6 +25,7 @@ class OAuthRequest {
      */
     public function __construct(HttpRequest $req) {
         $authorization = $req->headers['authorization'] ?? '';
+        $this->refresh_token = $req->headers['x-refresh-token'] ?? '';
 
         $this->authorization = preg_replace('@^\s*B(earer|asic)|\s*@', '', $authorization);
         $this->form = (object) $req->body;
@@ -44,8 +45,6 @@ class OAuthRequest {
         }
 
         if ($this->grant_type === 'refresh_token') {
-            $this->refresh_token = $this->form->refresh_token;
-
             if (empty($this->refresh_token)) {
                 throw new HttpException(HttpException::BAD_REQUEST, 'missing_refresh_token');
             }

@@ -61,12 +61,6 @@ class OAuthTokenServer {
      * @param mixed ...$args
      * @return bool
      */
-//    public function callMethod($name, ...$args) {
-//        if (!\function_exists("$this->controller::$name") && in_array($name, ['saveAccessToken'])) {
-//            return true;
-//        }
-//        return $this->controller::$name(...$args);
-//    }
 
     /**
      * Call controller functions
@@ -162,8 +156,10 @@ class OAuthTokenServer {
      * @return object|HttpException
      */
     public function auth_refresh_token(OAuthRequest $request) {
+        $refreshToken = $request->refresh_token;
+        
         // Get refresh token payload
-        $payload = $this->getRefreshToken($request->refresh_token);
+        $payload = $this->getRefreshToken($refreshToken);
         if (empty($payload)) {
             return new HttpException(HttpException::BAD_REQUEST, 'invalid_refresh_token');
         }
@@ -209,8 +205,6 @@ class OAuthTokenServer {
         /**
          * Generate new refresh token if needed
          */
-        $refreshToken = null;
-
         // Verifies that current refresh token is expired
         if($token_expired) {
             $refreshToken = $this->generateRefreshToken($client, $user, $accessToken);
@@ -262,8 +256,9 @@ class OAuthTokenServer {
      * @return HttpException|HttpResponse
      */
     public function revoke(HttpRequest $req, HttpResponse $res) {
-        $access_token = $req->headers['authorization'] ?? null;
-        $refresh_token = $req->headers['x-refresh-token'] ?? null;
+        $oauth_req = $req->oauth_request;
+        $access_token = $oauth_req->authorization ?? null;
+        $refresh_token = $oauth_req->refresh_token ?? null;
 
         if(is_null($access_token)) {
             return new HttpException(HttpException::BAD_REQUEST, 'missing_access_token');

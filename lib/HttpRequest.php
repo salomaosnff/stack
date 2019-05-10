@@ -78,7 +78,7 @@ class HttpRequest {
         if ($req->is('json')) {
             $req->body = (array) \json_decode($req->raw_body, true);
         } else if ($req->is('x-www-form-urlencoded')) {
-            $req->body = (array) self::qs_to_array($req->raw_body);
+            $req->body = (array) self::qs_to_array(urldecode($req->raw_body));
         } else if ($req->is('multipart/form-data')) {
             $req->body = (array) \json_decode(json_encode($_POST), true);
         }
