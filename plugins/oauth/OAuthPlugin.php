@@ -57,7 +57,7 @@ class OAuthPlugin {
      */
     public static function auth(...$scopes){
         return function (HttpRequest $req, HttpResponse $res) use ($scopes) {
-            return self::authRequest($req, $res, $scopes);
+            return self::authReq($req, $res, $scopes);
         };
     }
 
@@ -69,7 +69,7 @@ class OAuthPlugin {
      * @param array $scopes
      * @return HttpException
      */
-    public static function authRequest(HttpRequest $req, HttpResponse $res, array $scopes = []) {
+    public static function authReq(HttpRequest $req, HttpResponse $res, array $scopes = []) {
         if(! isset($req->oauth)) {
             return new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'oauth_plugin_not_started');
         }
