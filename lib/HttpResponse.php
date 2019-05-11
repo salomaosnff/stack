@@ -118,8 +118,23 @@ class HttpResponse {
     public function text(string $data, $status = 200) {
         return $this
             ->status($status)
-            ->headers(['Content-Type' => 'plain/text'])
+            ->headers(['Content-Type' => 'text/plain;charset=utf8'])
             ->write($data)
+            ;
+    }
+
+    /**
+     * Respond with HTML
+     *
+     * @param string $data
+     * @param int $status
+     * @return HttpResponse
+     */
+    public function html(string $html, $status = 200) {
+        return $this
+            ->status($status)
+            ->headers(['Content-Type' => 'text/html;charset=utf8'])
+            ->write($html)
             ;
     }
 
