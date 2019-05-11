@@ -13,17 +13,20 @@ class HttpResponse {
     public $locals = [];
     public $app;
     public $finished = false;
+    public $viewEngine;
+
+    public function __construct() {
+        $this->viewEngine = new PhpViewEngine();
+    }
 
     /**
      * Add headers to response
-     *
      * @param array $headers
      * @return $this
      */
     public function headers(array $headers) {
         $this->headers = array_merge($this->headers, $headers);
         $this->headers = array_filter($this->headers, function($item) { return !empty($item); });
-        
         return $this;
     }
 
@@ -167,6 +170,19 @@ class HttpResponse {
     public function finish() {
         $this->finished = true;
         return $this;
+    }
+
+    /**
+     * Render a view
+     */
+    public function render ($viewName, $data = []) {
+        if (!($this->viewEngine instanceof ViewEngine)) {
+            throw new \Exception('Invalid View Engine!');
+        }
+
+        return $this
+            ->clear()
+            ->write(call_user_func([$this->viewEngine, 'render'], $viewName, $data));
     }
 
     /**

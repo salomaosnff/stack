@@ -8,12 +8,17 @@ require_once __DIR__ . '/Functions.php';
  * @package Stack\Lib
  */
 class Stack extends Router {
+    public $response;
+    public $request;
 
     /**
      * @param string $controllers Base namespace for every controller in app
      */
     public function __construct ($controllers = '') {
         parent::__construct('/', $controllers);
+        $this->request = HttpRequest::get_current();
+        $this->response = new HttpResponse();
+        $this->response->app = $this;
     }
 
     /**
@@ -21,9 +26,8 @@ class Stack extends Router {
      * @return null
      */
     public function start() {
-        $request = HttpRequest::get_current();
-        $response = new HttpResponse();
-        $request->app = $this;
+        $request  = $this->request;
+        $response = $this->response;
         
         try {
             $res = $this->dispatch($request, $response);
@@ -43,7 +47,7 @@ class Stack extends Router {
                     $response->json($res);
                 }
                 else if(\is_string($res) || \is_numeric($res)) {
-                    $response->text((string)$res);
+                    $response->write((string) $res);
                 }
                 else {
                     throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, $res);
@@ -56,5 +60,15 @@ class Stack extends Router {
 
         $response->end();
         return null;
+    }
+
+    public function setViews (String $dir, String $ext = '.phtml') {
+        $this->response->viewEngine->setViews($dir, $ext);
+        return $this;
+    }
+
+    public function setViewEngine (ViewEngine $engine) {
+        $this->response->viewEngine = $engine;
+        return $this;
     }
 }

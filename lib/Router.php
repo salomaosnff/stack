@@ -18,7 +18,7 @@ class Router {
   public $stack;
 
   public function __construct(
-    $baseURL, 
+    $baseURL = '/', 
     $controllers = '',
     ?MiddlewareStack $stack = null
   ) {
