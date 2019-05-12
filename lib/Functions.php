@@ -5,7 +5,6 @@ use Stack\Lib\HttpRequest;
 /**
  * Normalize a method string, remove '@' and place '::'
  * with controllers base namespace
- *
  * @param string|callable|Routeable $method
  * @param string|null $controllers Namespace base para os controladores
  * @return string|string[]|null
@@ -28,7 +27,6 @@ function normalize_method($method, $controllers = '') {
 
 /**
  * Normalize a URL
- *
  * @param string ...$url
  * @return string|string[]|null
  */
@@ -42,7 +40,6 @@ function normalize_url(string...$url) {
 
 /**
  * Parse the URL params
- *
  * @param string $url
  * @param bool $end
  * @return array
@@ -82,7 +79,6 @@ function url_params(string $url, bool $end = true) {
 
 /**
  * Test a URL with the regex
- *
  * @param HttpRequest $request
  * @param bool $removeBaseURL
  * @param Router|Route $router Router instance
@@ -131,4 +127,19 @@ function resolve_namespace($baseNamespace = '', $namespace = '') {
   }
   $namespace = '\\' . $baseNamespace . '\\' . $namespace;
   return trim(preg_replace('@\\+@', '\\', $namespace), '\\');
+}
+
+/**
+ * Test a mime-type
+ */
+function mimeTypeIs($mime, $type):bool {
+  $type = preg_quote($type, '@');
+
+  if (strpos($mime, "*") !== false) {
+    $tmp = explode(";", $mime)[0];
+    $mime = $type;
+    $type = "^".preg_replace("@\*@", "[^/]*", $tmp)."$";
+  }
+
+  return (bool) preg_match("@$type@", $mime);
 }

@@ -7,7 +7,9 @@ namespace Stack\Lib;
  */
 class HttpResponse {
 
-    public $headers = [];
+    public $headers = [
+        'X-Powered-By' => 'Stack'
+    ];
     public $status = null;
     public $body = '';
     public $locals = [];
@@ -72,8 +74,7 @@ class HttpResponse {
      * @return bool
      */
     public function is(string $type) {
-        $type = preg_quote($type, '@');
-        return (bool) \preg_match("@$type@", ($this->headers['Content-Type'] ?? ''));
+        return mimeTypeIs($this->headers['content-type'] ?? '', $type);
     }
 
     /**
@@ -140,34 +141,101 @@ class HttpResponse {
 
     /**
      * Respond with an Error
-     *
      * @param \Exception $error
      * @param null $info
      * @param int $status
      * @return HttpResponse
      */
-    public function error(\Exception $error, $info = null, $status = 200) {
+    public function error(\Exception $error, $info = null, $status = 500) {
+        $showErrors = !!$this->app->display_errors;
+
         if ($error instanceof HttpException) {
-            $status = $error->getCode();
             $info = $info ?? $error->info;
-        } else if ($error instanceof \Exception) {
-            $error = new HttpException(HttpException::INTERNAL_SERVER_ERROR, [
-                'error' => $error->getMessage(),
-                'code' => $error->getCode()
-            ]);
             $status = $error->getCode();
+            return $this->format([
+                'application/json' => function ($res) use ($error, $info, $status, $showErrors) {
+                    $json = [
+                        'error' => $error->getMessage(),
+                        'code'  => $status,
+                        'info'  => $info
+                    ];
+                    if ($showErrors) $json['trace'] = $error->getTraceAsString();
+                    return $res->json($json, $status);
+                },
+                'text/html' => function ($res) use ($error, $info, $status, $showErrors) {
+                    return $res->html(
+                        "<h1>$status</h1>".
+                        "<h2>{$error->getMessage()}</h2>".
+                        "<p>$info</p>".
+                        ($showErrors ? "<pre>{$error->getTraceAsString()}</pre>" : ""),
+                        $status
+                    );
+                },
+                'text/plain' => function ($res) use ($error, $info, $status, $showErrors) {
+                    return $res->text(
+                        "{$error->getCode()}\n".
+                        "{$error->getMessage()}\n".
+                        "$info\n".
+                        ($showErrors ? "\nStack Trace:\n{$error->getTraceAsString()}" : ""),
+                        $status
+                    );
+                },
+            ]);
         }
 
-        return $this->json([
-            'message' => $error->getMessage(),
-            'code' => $error->getCode(),
-            'info' => $info ?? $error->info
-        ], $status);
+        if ($showErrors) {
+            return $this->status($status)->format([
+                'application/json' => function ($res) use ($error, $showErrors) {
+                    $json = [
+                        'error' => $error->getMessage(),
+                        'code' => $error->getCode(),
+                    ];
+                    if ($showErrors) $json['trace'] = $error->getTraceAsString();
+                    return $res->json($json);
+                },
+                'text/html' => function ($res) use ($error, $showErrors) {
+                    return $res->html(
+                        "<h1>Uncaught Error</h1>".
+                        "<h2>{$error->getMessage()}</h2>".
+                        ($showErrors ? "Stack Trace: <pre>{$error->getTraceAsString()}</pre>" : "")
+                    );
+                },
+                'text/plain' => function ($res) use ($error, $showErrors) {
+                    return $res->html(
+                        "Uncaught Error\n".
+                        "{$error->getMessage()}\n".
+                        ($showErrors ? "\nStack Trace:\n{$error->getTraceAsString()}" : "")
+                    );
+                },
+            ]);
+        }
+
+        return $this->error(new HttpException(HttpException::INTERNAL_SERVER_ERROR));
+    }
+
+
+    /**
+     * Responds according to the Accept type os request
+     * @param bool $die
+     */
+    public function format ($formats = [], $default = 'text/plain') {
+        $requestFormats = explode(',', $this->app->request->headers['accept'] ?? '');
+        
+        foreach ($requestFormats as $requestType) {
+            foreach ($formats as $type => $callback) {
+                if (mimeTypeIs($requestType, $type)) {
+                    return $callback($this);
+                }
+            }
+        }
+
+        if (isset($formats[$default])) return call_user_func($formats[$default], $this);
+
+        throw new HttpException(HttpException::NOT_ACCEPTABLE);
     }
 
     /**
      * End the response
-     *
      * @param bool $die
      */
     public function end ($die = true) {

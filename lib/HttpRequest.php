@@ -88,18 +88,24 @@ class HttpRequest {
 
     /**
      * Check current request type
-     *
      * @param $type
      * @return bool
      */
     public function is($type) {
-        $type = preg_quote($type, '@');
-        return (bool) preg_match("@$type@", ($this->headers['content-type'] ?? ''));
+        return mimeTypeIs($this->headers['content-type'] ?? '', $type);
+    }
+
+    /**
+     * Check current request accept type
+     * @param $type
+     * @return bool
+     */
+    public function accept($type) {
+        return mimeTypeIs($this->headers['accept'] ?? '', $type);
     }
 
     /**
      * Check if has a param in the body
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -117,7 +123,6 @@ class HttpRequest {
 
     /**
      * Check if has a param in the body
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -135,7 +140,6 @@ class HttpRequest {
 
     /**
      * Check if has a file
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -153,7 +157,6 @@ class HttpRequest {
 
     /**
      * Check if has a param
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -171,7 +174,6 @@ class HttpRequest {
 
     /**
      * Check if has any of given keys in query
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -188,7 +190,6 @@ class HttpRequest {
 
     /**
      * Check if has any of given keys in body
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -205,7 +206,6 @@ class HttpRequest {
 
     /**
      * Check if has any file
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -223,7 +223,6 @@ class HttpRequest {
 
     /**
      * Check if has any param
-     *
      * @param string ...$keys
      * @return bool
      */
@@ -241,7 +240,6 @@ class HttpRequest {
 
     /**
      * Get param from body
-     *
      * @param $key
      * @return null|mixed
      */
@@ -254,7 +252,6 @@ class HttpRequest {
 
     /**
      * Get param from query
-     *
      * @param $key
      * @return null|string
      */
@@ -267,7 +264,6 @@ class HttpRequest {
 
     /**
      * Get file from request
-     *
      * @param $key
      * @return null|FileRequest
      */
@@ -280,7 +276,6 @@ class HttpRequest {
 
     /**
      * Get file from request
-     *
      * @param $key
      * @return null|string
      */
@@ -292,6 +287,7 @@ class HttpRequest {
     }
 
     /**
+     * Create a Base64 File
      * @param string $reference
      * @param string $field_name
      * @param string $field_data
@@ -316,7 +312,6 @@ class HttpRequest {
 
     /**
      * Convert query string to array of parameters
-     *
      * @param string $query
      * @return array
      */

@@ -10,6 +10,7 @@ require_once __DIR__ . '/Functions.php';
 class Stack extends Router {
     public $response;
     public $request;
+    public $display_errors = false;
 
     /**
      * @param string $controllers Base namespace for every controller in app
@@ -19,6 +20,7 @@ class Stack extends Router {
         $this->request = HttpRequest::get_current();
         $this->response = new HttpResponse();
         $this->response->app = $this;
+        $this->display_errors = ini_get('display_errors');
     }
 
     /**
@@ -33,13 +35,12 @@ class Stack extends Router {
             $res = $this->dispatch($request, $response);
 
             if (\is_null($res)) {
-              throw new HttpException(HttpException::NOT_FOUND,
-                    "Cannot found $request->original_url.");
+                $response->text("Cannot {$request->method} $request->original_url", 404);
             }
 
-            if ($res instanceof \Exception) throw $res;
+            else if ($res instanceof \Exception) throw $res;
 
-            if (!($res instanceof HttpResponse)) {
+            else if (!($res instanceof HttpResponse)) {
                 /**
                  * Show default value of type
                  */
