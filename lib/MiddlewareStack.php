@@ -155,9 +155,7 @@ class MiddlewareStack {
                 else if($type_name === HttpResponse::class) {
                     $args[] = $res;
                 }
-                else if($type_name === \Exception::class || 
-                    is_subclass_of($type_name, \Exception::class)
-                ) {
+                else if(\is_a($type_name, \Exception::class, true)) {
                     $args[] = $out;
                     $error_func = $type_name;
                 }
@@ -171,10 +169,10 @@ class MiddlewareStack {
 
             // Invoke normal or error function
             try {
-                if((!is_null($error_func) &&
-                    ($out instanceof \Exception && 
-                    $error_func === get_class($out))) ||
-                    (is_null($error_func) && !($out instanceof \Exception))
+                if((!is_null($error_func) && $out instanceof \Exception && 
+                    ($error_func === get_class($out) || 
+                    (\is_a($out, $error_func) && !is_a($out, HttpException::class)) )) ||
+                    is_null($error_func) && !($out instanceof \Exception)
                 ) {
                     if($reflex instanceof \ReflectionFunction) {
                         $out = $middleware(...$args);
