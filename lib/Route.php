@@ -5,13 +5,12 @@ use Stack\Lib\HttpRequest;
 use Stack\Lib\HttpResponse;
 use Stack\Lib\HttpException;
 
-class Route {
+class Route extends RouterMethods {
 
-  public $url = '/';
-  public $regex = '@^/*$@';
-  public $params = [];
+  /**
+   * @var array
+   */
   public $stack_methods = [];
-  public $_controllers = '';
 
   /**
    * Method registration
@@ -108,27 +107,13 @@ class Route {
     return new HttpException(HttpException::METHOD_NOT_ALLOWED);
   }
 
-  public function __get($prop) {
-    if($prop === 'controllers') {
-      if(!\is_null($this->parent)) {
-        return resolve_namespace($this->parent->controllers, $this->_controllers);
-      }
-      return $this->_controllers;
-    }
-  }
-
   /**
    * @param string $url Final URL to be matched
    * @param string $controllers Namespace dos controladores
-   * @param array $stack_methods Lista
+   * @param array $stack_methods Stack methods list
    */
   public function __construct($url, $controllers = '', $stack_methods = []) {
-    $this->url = normalize_url($url);
-    $this->_controllers = $controllers;
-
-    $url = url_params($this->url, true);
-    $this->regex = $url['regex'];
-    $this->params = $url['params'];
+    parent::__construct($url, $controllers);
 
     foreach($stack_methods as $method => $middlewares) {
       $this->register_method($method, $middlewares);

@@ -4,40 +4,25 @@ namespace Stack\Lib;
 use Stack\Lib\HttpRequest;
 use Stack\Lib\HttpResponse;
 
-class Router {
-
-  public $baseURL = '/';
-  public $_controllers = '';
-  public $parent = null;
-  public $regex = '@^/*$@';
-  public $params = [];
+class Router extends RouterMethods {
   
   /**
    * @var MiddlewareStack
    */
   public $stack;
 
+  /**
+   * @param string $baseURL Base url for routing
+   * @param string $controllers Namespace for controllers
+   * @param MiddlewareStack $stack A MiddlewareStack instance to use
+   */
   public function __construct(
     $baseURL = '/', 
     $controllers = '',
     ?MiddlewareStack $stack = null
   ) {
-    $this->baseURL = normalize_url($baseURL);
-    $this->_controllers = $controllers;
+    parent::__construct($baseURL, $controllers);
     $this->stack = $stack ?? new MiddlewareStack($this);
-    
-    $url = url_params($this->baseURL, false);
-    $this->regex = $url['regex'];
-    $this->params = $url['params'];
-  }
-
-  public function __get($prop) {
-    if($prop === 'controllers') {
-      if(!\is_null($this->parent)) {
-        return resolve_namespace($this->parent->controllers, $this->_controllers);
-      }
-      return $this->_controllers;
-    }
   }
 
   /**

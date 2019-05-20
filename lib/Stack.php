@@ -1,6 +1,5 @@
 <?php
 namespace Stack\Lib;
-
 require_once __DIR__ . '/Functions.php';
 
 /**
@@ -8,8 +7,20 @@ require_once __DIR__ . '/Functions.php';
  * @package Stack\Lib
  */
 class Stack extends Router {
+
+    /**
+     * @var HttpResponse $response The HttpResponse instance
+     */
     public $response;
+
+    /**
+     * @var HttpRequest $request The HttpRequest request instance
+     */
     public $request;
+
+    /**
+     * @var bool $display_errors Display stack traces
+     */
     public $display_errors = false;
 
     /**

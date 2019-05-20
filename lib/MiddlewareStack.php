@@ -69,6 +69,10 @@ class MiddlewareStack {
         $instance = null;
         
         if (is_callable($middleware, true)) {
+
+            /**
+             * Parse class constructor parameters
+             */
             if(is_string($middleware) && preg_match('/::/', $middleware)) {
                 // Middleware is a method
 
@@ -86,14 +90,34 @@ class MiddlewareStack {
                         $instance = $class_reflex->newInstanceWithoutConstructor();
                     }
                 } else {
-                    $class_args = $class_constructor->getNumberOfParameters();
+                    $class_params = $class_constructor->getParameters();
+                    $constructor_args = [];
 
-                    if($class_args === 1) {
-                        $instance = $class_reflex->newInstance($req);
+                    // Parse constructor params
+                    foreach($class_params as $param) {
+                        $type = $param->getType();
+                        $type_name = $type ? $type->getName() : '';
+
+                        // Custom param parser
+                        $parser = $this->parent->middlewareParamParser($param, $class_reflex, $req, $res);
+
+                        // Check param types
+                        if(! is_null($parser) && $parser !== false) {
+                            $constructor_args[] = $parser;
+                        }
+                        else if($type_name === HttpRequest::class) {
+                            $constructor_args[] = $req;
+                        }
+                        else if($type_name === HttpResponse::class) {
+                            $constructor_args[] = $res;
+                        }
+                        else {
+                            $constructor_args[] = null;
+                        }
                     }
-                    else if($class_args === 2) {
-                        $instance = $class_reflex->newInstance($req, $res);
-                    }
+
+                    // Instanciate
+                    $instance = $class_reflex->newInstance(...$constructor_args);
 
                     // If method is a non static method and have no instance, create one
                     if(!$reflex->isStatic() && !$instance) {
@@ -101,12 +125,13 @@ class MiddlewareStack {
                     }
                 }
             } else {
-                // Anonymous function
+                // Middleware is an anonymous function
                 $reflex = new \ReflectionFunction($middleware);
             }
 
-            $args_len = $reflex->getNumberOfParameters();
-
+            /**
+             * Parse controller parameters
+             */
             $params = $req->params ?? [];
             $reflex_params = $reflex->getParameters();
             $args = [];
@@ -114,9 +139,17 @@ class MiddlewareStack {
 
             foreach ($reflex_params as $ref_param) {
                 $name = strtolower($ref_param->getName());
-                $type_name = $ref_param->getType() ? $ref_param->getType()->getName() : '';
+                $type = $ref_param->getType();
+                $type_name = $type ? $type->getName() : '';
 
-                if($type_name === HttpRequest::class) {
+                // Custom param parser
+                $parser = $this->parent->middlewareParamParser($ref_param, $reflex, $req, $res);
+
+                // Check param types
+                if(! is_null($parser) && $parser !== false) {
+                    $args[] = $parser;
+                }
+                else if($type_name === HttpRequest::class) {
                     $args[] = $req;
                 }
                 else if($type_name === HttpResponse::class) {
