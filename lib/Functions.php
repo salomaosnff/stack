@@ -1,6 +1,6 @@
 <?php
-use Stack\Lib\Router;
 use Stack\Lib\HttpRequest;
+use Stack\Lib\Router;
 
 /**
  * Normalize a method string, remove '@' and place '::'
@@ -9,20 +9,20 @@ use Stack\Lib\HttpRequest;
  * @param string|null $controllers Namespace base para os controladores
  * @return string|string[]|null
  */
-function normalize_method($method, $controllers = '') {
-  if(is_string($method)) {
-    $controllers = is_null($controllers) ? '' : trim("$controllers", "\\");
-    $method = preg_replace('/\@+/', '::', $method);
+function normalize_method($method, $controllers = '')
+{
+    if (is_string($method)) {
+        $controllers = is_null($controllers) ? '' : trim("$controllers", "\\");
+        $method      = preg_replace('/\@+/', '::', $method);
 
-    if(empty($controllers)) {
-      return $method;
+        if (empty($controllers)) {
+            return $method;
+        } else if (substr($method, 0, 1) === '\\') {
+            $controllers = '';
+        }
+        return "\\" . trim("$controllers\\$method", "\\");
     }
-    else if(substr($method, 0, 1) === '\\') {
-      $controllers = '';
-    }
-    return "\\" . trim("$controllers\\$method", "\\");
-  }
-  return $method;
+    return $method;
 }
 
 /**
@@ -30,12 +30,13 @@ function normalize_method($method, $controllers = '') {
  * @param string ...$url
  * @return string|string[]|null
  */
-function normalize_url(string...$url) {
-  array_unshift($url, '/');
-  $url = join('/', $url);
-  $url = \preg_replace('@/+@', '/', $url);
-  $url = \preg_replace('@(?<=.)/$@', '', $url);
-  return $url;
+function normalize_url(string...$url)
+{
+    array_unshift($url, '/');
+    $url = join('/', $url);
+    $url = \preg_replace('@/+@', '/', $url);
+    $url = \preg_replace('@(?<=.)/$@', '', $url);
+    return $url;
 }
 
 /**
@@ -44,37 +45,38 @@ function normalize_url(string...$url) {
  * @param bool $end
  * @return array
  */
-function url_params(string $url, bool $end = true) {
-  $params = [];
-  $regex = ['@^'];
+function url_params(string $url, bool $end = true)
+{
+    $params = [];
+    $regex  = ['@^'];
 
-  $url = \preg_replace_callback('@:([\w-_]+)([^\/]*)@', function ($match) use (&$params) {
-    $name = $match[1];
-    $params[] = $name;
+    $url = \preg_replace_callback('@:([\w-_]+)([^\/]*)@', function ($match) use (&$params) {
+        $name     = $match[1];
+        $params[] = $name;
 
-    if ($match[2] === '?') {
-      $match[2] = "?([^/]*)/*";
+        if ($match[2] === '?') {
+            $match[2] = "?([^/]*)/*";
+        }
+        return empty($match[2]) ? '([^/]+)' : $match[2];
+    }, $url);
+
+    if (!$end && $url !== '/') {
+        $url .= '\b';
     }
-    return empty($match[2]) ? '([^/]+)' : $match[2];
-  }, $url);
 
-  if (!$end && $url !== '/') {
-    $url .= '\b';
-  }
+    $regex[] = $url;
 
-  $regex[] = $url;
+    if ($end) {
+        $regex[] = '$';
+    }
 
-  if ($end) {
-    $regex[] = '$';
-  }
+    $regex[] = '@';
+    $regex   = join('', $regex);
 
-  $regex[] = '@';
-  $regex = join('', $regex);
-
-  return [
-    'params' => $params,
-    'regex' => $regex,
-  ];
+    return [
+        'params' => $params,
+        'regex'  => $regex,
+    ];
 }
 
 /**
@@ -85,61 +87,63 @@ function url_params(string $url, bool $end = true) {
  * @return bool
  */
 function test_url(
-  HttpRequest &$request, 
-  bool $removeBaseURL = true, 
-  $router
+    HttpRequest &$request,
+    bool $removeBaseURL = true,
+    $router
 ) {
-  preg_match($router->regex, $request->url, $matches);
+    preg_match($router->regex, $request->url, $matches);
 
-  if (count($matches) <= 0) {
-    return false;
-  }
+    if (count($matches) <= 0) {
+        return false;
+    }
 
-  if(count($matches) === 1) {
-    $matches = [trim(array_shift($matches), '/')];
-  } else {
-    $matches = array_slice($matches, 1);
-  }
+    if (count($matches) === 1) {
+        $matches = [trim(array_shift($matches), '/')];
+    } else {
+        $matches = array_slice($matches, 1);
+    }
 
-  if ($removeBaseURL) {
-    $request->url = normalize_url(\preg_replace($router->regex, '', $request->url));
-  }
+    if ($removeBaseURL) {
+        $request->url = normalize_url(\preg_replace($router->regex, '', $request->url));
+    }
 
-  if (empty($request->params)) {
-    $request->params = [];
-  }
+    if (empty($request->params)) {
+        $request->params = [];
+    }
 
-  $params = @array_combine($router->params, $matches);
+    $params = @array_combine($router->params, $matches);
 
-  if(is_array($params)) {
-    $request->params = array_merge($request->params, $params);
-  }
+    if (is_array($params)) {
+        $request->params = array_merge($request->params, $params);
+    }
 
-  return true;
+    return true;
 }
 
 /**
  * Resolve namespaces
  */
-function resolve_namespace($baseNamespace = '', $namespace = '') {
-  if(substr($namespace, 0, 1) === '\\') {
-      $baseNamespace = '';
-  }
-  $namespace = '\\' . $baseNamespace . '\\' . $namespace;
-  return trim(preg_replace('@\\+@', '\\', $namespace), '\\');
+function resolve_namespace($baseNamespace = '', $namespace = '')
+{
+    if (substr($namespace, 0, 1) === '\\') {
+        $baseNamespace = '';
+    }
+    $namespace = '\\' . $baseNamespace . '\\' . $namespace;
+    return trim(preg_replace('@\\+@', '\\', $namespace), '\\');
 }
 
 /**
  * Test a mime-type
  */
-function mimeTypeIs($mime, $type):bool {
-  $type = preg_quote($type, '@');
+function mimeTypeIs($mime, $type): bool
+{
+    $type = preg_quote($type, '@');
 
-  if (strpos($mime, "*") !== false) {
-    $tmp = explode(";", $mime)[0];
-    $mime = $type;
-    $type = "^".preg_replace("@\*@", "[^/]*", $tmp)."$";
-  }
+    if (strpos($mime, "*") !== false) {
+        $tmp  = explode(";", $mime)[0];
+        $mime = $type;
+        $type = "^" . preg_replace("@\*@", "[^/]*", $tmp) . "$";
+    }
 
-  return (bool) preg_match("@$type@", $mime);
+    return (bool) preg_match("@$type@", $mime);
 }
