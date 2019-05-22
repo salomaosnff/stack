@@ -1,12 +1,14 @@
 <?php
 namespace Stack\Lib;
+
 require_once __DIR__ . '/Functions.php';
 
 /**
  * Stack - Main router class
  * @package Stack\Lib
  */
-class Stack extends Router {
+class Stack extends Router
+{
 
     /**
      * @var HttpResponse $response The HttpResponse instance
@@ -26,11 +28,12 @@ class Stack extends Router {
     /**
      * @param string $controllers Base namespace for every controller in app
      */
-    public function __construct ($controllers = '') {
+    public function __construct($controllers = '')
+    {
         parent::__construct('/', $controllers);
-        $this->request = HttpRequest::get_current();
-        $this->response = new HttpResponse();
-        $this->response->app = $this;
+        $this->request        = HttpRequest::get_current();
+        $this->response       = new HttpResponse();
+        $this->response->app  = $this;
         $this->display_errors = ini_get('display_errors');
     }
 
@@ -38,34 +41,34 @@ class Stack extends Router {
      * Capture the request and start routing
      * @return null
      */
-    public function start() {
+    public function start()
+    {
         $request  = $this->request;
         $response = $this->response;
-        
+
         try {
             $res = $this->dispatch($request, $response);
 
             if (\is_null($res)) {
-                $response->text("Cannot {$request->method} $request->original_url", 404);
-            }
-
-            else if ($res instanceof \Exception) throw $res;
-
-            else if (!($res instanceof HttpResponse)) {
+                throw new HttpException(HttpException::NOT_FOUND, [
+                    'message' => "Cannot {$request->method} $request->original_url",
+                    'code'    => 'route_not_found',
+                ]);
+            } else if ($res instanceof \Exception) {
+                throw $res;
+            } else if (!($res instanceof HttpResponse)) {
                 /**
                  * Show default value of type
                  */
-                if(\is_bool($res) || \is_array($res) || \is_object($res)) {
+                if (\is_bool($res) || \is_array($res) || \is_object($res)) {
                     $response->json($res);
-                }
-                else if(\is_string($res) || \is_numeric($res)) {
+                } else if (\is_string($res) || \is_numeric($res)) {
                     $response->write((string) $res);
-                }
-                else {
+                } else {
                     throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, $res);
                 }
             }
-            
+
         } catch (\Exception $error) {
             $response->error($error);
         }
@@ -74,12 +77,14 @@ class Stack extends Router {
         return null;
     }
 
-    public function setViews (String $dir, String $ext = '.phtml') {
+    public function setViews(String $dir, String $ext = '.phtml')
+    {
         $this->response->viewEngine->setViews($dir, $ext);
         return $this;
     }
 
-    public function setViewEngine (ViewEngine $engine) {
+    public function setViewEngine(ViewEngine $engine)
+    {
         $this->response->viewEngine = $engine;
         return $this;
     }
