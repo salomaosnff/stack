@@ -11,38 +11,43 @@ use Stack\Lib\Router;
  *
  * @package Stack\Plugins\OAuth
  */
-class OAuthPlugin {
+class OAuthPlugin
+{
 
     public $router;
     public $server;
 
     /**
-     * @param Router $app
-     * @param string $controller
-     * @param string $baseUrl
-     * @param array $server_options Options for auth server
+     * @param Router $app Main app router
+     * @param string $controller OAuth Controller class name
+     * @param array $options Options for OAuth plugin
      */
-    public function __construct (
+    public function __construct(
         Router $app,
         string $controller,
-        string $baseUrl = '/oauth',
-        array $server_options = []
+        array $options = []
     ) {
-        $this->server = new OAuthTokenServer($controller, $server_options);
-        $this->router =  new Router($baseUrl);
+        $options = array_replace([
+            'base_url'   => '/oauth',
+            'token_url'  => '/token',
+            'revoke_url' => '/token/revoke',
+        ], $options);
 
-        $app->use(function(HttpRequest $req) {
-            $req->oauth = $this;
+        $this->server = new OAuthTokenServer($controller);
+        $this->router = new Router($options['base_url']);
+
+        $app->use(function (HttpRequest $req) {
+            $req->oauth         = $this;
             $req->oauth_request = new OAuthRequest($req);
         });
 
-        $this->router->route('/token')
-            ->post(function(HttpRequest $req, HttpResponse $res) {
+        $this->router->route($options['token_url'])
+            ->post(function (HttpRequest $req, HttpResponse $res) {
                 return $this->server->server($req, $res);
             });
 
-        $this->router->route('/token/revoke')
-            ->delete(function(HttpRequest $req, HttpResponse $res) {
+        $this->router->route($options['revoke_url'])
+            ->delete(function (HttpRequest $req, HttpResponse $res) {
                 return $this->server->revoke($req, $res);
             });
 
@@ -55,28 +60,33 @@ class OAuthPlugin {
      * @param mixed ...$scopes
      * @return \Closure
      */
-    public static function auth(...$scopes){
+    public static function auth(...$scopes)
+    {
         return function (HttpRequest $req, HttpResponse $res) use ($scopes) {
-            return self::authReq($req, $res, $scopes);
+            return self::authRequest($req, $res, $scopes);
         };
     }
 
     /**
-     * Check authentication in a request
+     * Force request to be authenticated
      *
      * @param HttpRequest $req
      * @param HttpResponse $res
      * @param array $scopes
-     * @return HttpException
      */
-    public static function authReq(HttpRequest $req, HttpResponse $res, array $scopes = []) {
-        if(! isset($req->oauth)) {
-            return new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'oauth_plugin_not_started');
+    public static function authRequest(
+        HttpRequest $req,
+        HttpResponse $res,
+        array $scopes = []
+    ) {
+        if (!isset($req->oauth)) {
+            throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'oauth_plugin_not_started');
         }
         return $req->oauth->server->session($req, $res);
 
-//            if (!$req->oauth_request->hasScope(...$scopes)) {
-//                return new HttpException(HttpException::FORBIDDEN, 'Insufficient permissions!');
-//            }
+        // TODO: Scopos e permissões
+        // if (!$req->oauth_request->hasScope(...$scopes)) {
+        //     return new HttpException(HttpException::FORBIDDEN, 'Insufficient permissions!');
+        // }
     }
 }

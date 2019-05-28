@@ -2,26 +2,11 @@
 namespace Stack\Plugins\OAuth;
 
 /**
- * OAuth Controller Interface class
+ * OAuth Controller implementation class
  * @package Stack\Plugins\OAuth
  */
-abstract class OAuthController {
-
-    private $options;
-
-    public function __construct(array $options = []) {
-        $this->options = $options;
-    }
-
-    /**
-     * Get server option
-     *
-     * @param string $option
-     * @return mixed|null
-     */
-    protected function getOption(string $option) {
-        return $this->options[$option] ?? null;
-    }
+abstract class OAuthControllerBase
+{
 
     /**
      * Get client credentials
@@ -30,7 +15,7 @@ abstract class OAuthController {
      * @param string|null $secret
      * @return object|null
      */
-    abstract function getClient($client_id, ?string $secret = null): ?object;
+    abstract public function getClient($client_id, ?string $secret = null): ?object;
 
     /**
      * Get user credentials
@@ -39,7 +24,7 @@ abstract class OAuthController {
      * @param string|null $password
      * @return object|null
      */
-    abstract function getUser($username_or_id, ?string $password = null): ?object;
+    abstract public function getUser($username_or_id, ?string $password = null): ?object;
 
     /**
      * Generate and return a access token
@@ -48,7 +33,7 @@ abstract class OAuthController {
      * @param object $user
      * @return string|null
      */
-    abstract function generateAccessToken(object $client, object $user): ?string;
+    abstract public function generateAccessToken(object $client, object $user): ?string;
 
     /**
      * Generate and return a refresh token
@@ -58,7 +43,7 @@ abstract class OAuthController {
      * @param string $accessToken
      * @return string|null
      */
-    abstract function generateRefreshToken(object $client, object $user, string $accessToken): ?string;
+    abstract public function generateRefreshToken(object $client, object $user, string $accessToken): ?string;
 
     /**
      * Get the access token payload
@@ -66,7 +51,7 @@ abstract class OAuthController {
      * @param string $access_token
      * @return object|null
      */
-    abstract function getAccessToken(string $access_token): ?object;
+    abstract public function getAccessToken(string $access_token): ?object;
 
     /**
      * Get refresh token payload
@@ -74,7 +59,7 @@ abstract class OAuthController {
      * @param string $refresh_token
      * @return object|null
      */
-    abstract function getRefreshToken(string $refresh_token): ?object;
+    abstract public function getRefreshToken(string $refresh_token): ?object;
 
     /**
      * Function to save the access token somewhere in the back-end
@@ -85,7 +70,7 @@ abstract class OAuthController {
      * @param string $refresh_token
      * @return object|null
      */
-    abstract function saveToken(object $client, object $user, string $access_token, string $refresh_token): ?object;
+    abstract public function saveToken(object $client, object $user, string $access_token, string $refresh_token): ?object;
 
     /**
      * Revoke a token to database
@@ -94,7 +79,8 @@ abstract class OAuthController {
      * @param array|object $refresh_token
      * @return bool|null
      */
-    function revokeToken($access_token, $refresh_token): ?bool { return true; }
+    public function revokeToken($access_token, $refresh_token): ?bool
+    {return true;}
 
     /**
      * Validate a access token
@@ -103,7 +89,8 @@ abstract class OAuthController {
      * @param array $options
      * @return bool
      */
-    function validateAccessToken($access_token, array $options = []): bool { return true; }
+    public function validateAccessToken($access_token, array $options = []): bool
+    {return true;}
 
     /**
      * Validate a refresh token
@@ -112,5 +99,6 @@ abstract class OAuthController {
      * @param array $options
      * @return bool
      */
-    function validateRefreshToken($refresh_token, array $options = []): bool { return true; }
+    public function validateRefreshToken($refresh_token, array $options = []): bool
+    {return true;}
 }
