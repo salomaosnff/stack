@@ -6,7 +6,8 @@ namespace Stack\Plugins\OAuth;
  * Class JWT
  * @package Stack\Plugins\OAuth
  */
-class JWT {
+class JWT
+{
 
     /**
      * Generate the encrypted JWT token with payload and secret
@@ -15,7 +16,8 @@ class JWT {
      * @param string $secret Secret key
      * @return string
      */
-    public static function sign($payload, string $secret) {
+    public static function sign($payload, string $secret)
+    {
         $payload['jti'] = $payload['jti'] ?? self::uuid4();
 
         // Create token header as a JSON string
@@ -31,7 +33,7 @@ class JWT {
         $base64UrlPayload = self::base64UrlEncode($payload);
 
         // Create Signature Hash
-        $signature = hash_hmac('sha256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
+        $signature = hash_hmac('SHA256', $base64UrlHeader . "." . $base64UrlPayload, $secret, true);
 
         // Encode Signature to Base64Url String
         $base64UrlSignature = self::base64UrlEncode($signature);
@@ -46,10 +48,13 @@ class JWT {
      * @param string $jwt
      * @return object|null
      */
-    public static function decode(string $jwt): ?object {
+    public static function decode(string $jwt): ?object
+    {
         $payload = explode('.', $jwt);
 
-        if(! isset($payload[1])) return null;
+        if (!isset($payload[1])) {
+            return null;
+        }
 
         $payloadEncoded = $payload[1];
         $payloadDecoded = self::base64UrlDecode($payloadEncoded);
@@ -63,11 +68,14 @@ class JWT {
      * @param string $secret Token secret key
      * @return bool|object|null
      */
-    public static function verify(string $jwt, string $secret) {
-        @list($headerEncoded, $payloadEncoded, $signatureEncoded) = explode('.', $jwt);
-        $dataEncoded = "$headerEncoded.$payloadEncoded";
-        $signature = self::base64UrlDecode($signatureEncoded);
-        $rawSignature = hash_hmac('sha256', $dataEncoded, $secret, true);
+    public static function verify(string $jwt, string $secret)
+    {
+        @list($headerEncoded,
+            $payloadEncoded,
+            $signatureEncoded) = explode('.', $jwt);
+        $dataEncoded       = "$headerEncoded.$payloadEncoded";
+        $signature         = self::base64UrlDecode($signatureEncoded);
+        $rawSignature      = hash_hmac('SHA256', $dataEncoded, $secret, true);
         return hash_equals($rawSignature, $signature) ? self::decode($jwt) : false;
     }
 
@@ -78,9 +86,10 @@ class JWT {
      * @param string|null $secret
      * @return bool
      */
-    public static function expired($token, $secret = null): bool {
+    public static function expired($token, $secret = null): bool
+    {
         if (\is_null($secret) && \is_object($token)) {
-            $token = (object) $token;
+            $token        = (object) $token;
             $current_time = time();
             $expires_time = $token->exp;
             return $current_time >= $expires_time;
@@ -96,7 +105,8 @@ class JWT {
      * @param $data
      * @return bool|string
      */
-    public static function base64UrlDecode($data) {
+    public static function base64UrlDecode($data)
+    {
         return base64_decode(str_replace(['-', '_', ''], ['+', '/', '='], $data));
     }
 
@@ -106,7 +116,8 @@ class JWT {
      * @param $data
      * @return mixed
      */
-    public static function base64UrlEncode($data) {
+    public static function base64UrlEncode($data)
+    {
         return str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($data));
     }
 
@@ -115,7 +126,8 @@ class JWT {
      *
      * @return string
      */
-    public static function uuid4() {
+    public static function uuid4()
+    {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
 
             // 32 bits for "time_low"

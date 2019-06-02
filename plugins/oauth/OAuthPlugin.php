@@ -36,16 +36,35 @@ class OAuthPlugin
         $this->server = new OAuthTokenServer($controller);
         $this->router = new Router($options['base_url']);
 
+        /**
+         * OAuth Request injection
+         */
         $app->use(function (HttpRequest $req) {
             $req->oauth         = $this;
             $req->oauth_request = new OAuthRequest($req);
         });
 
+        /**
+         * Send no-cache headers in auth route
+         */
+        $this->router->use(function (HttpResponse $res) {
+            $res->headers([
+                'Cache-Control' => 'no-cache',
+                'Pragma'        => 'no-cache',
+            ]);
+        });
+
+        /**
+         * Token route
+         */
         $this->router->route($options['token_url'])
             ->post(function (HttpRequest $req, HttpResponse $res) {
                 return $this->server->server($req, $res);
             });
 
+        /**
+         * Token revoke route
+         */
         $this->router->route($options['revoke_url'])
             ->delete(function (HttpRequest $req, HttpResponse $res) {
                 return $this->server->revoke($req, $res);
