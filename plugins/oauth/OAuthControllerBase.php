@@ -64,13 +64,13 @@ abstract class OAuthControllerBase
     /**
      * Function to save the access token somewhere in the back-end
      *
-     * @param object $client
-     * @param object $user
      * @param string $access_token
      * @param string $refresh_token
+     * @param object $user
+     * @param object $client
      * @return object|null
      */
-    abstract public function saveToken(object $client, object $user, string $access_token, string $refresh_token): ?object;
+    abstract public function saveToken(string $access_token, string $refresh_token, object $user, object $client): ?object;
 
     /**
      * Revoke a token to database
