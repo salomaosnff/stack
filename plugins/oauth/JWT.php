@@ -89,10 +89,9 @@ class JWT
     public static function expired($token, $secret = null): bool
     {
         if (\is_null($secret) && \is_object($token)) {
-            $token        = (object) $token;
-            $current_time = time();
-            $expires_time = $token->exp;
-            return $current_time >= $expires_time;
+            $token      = (object) $token;
+            $expires_at = $token->exp;
+            return $expires_at >= 0 && $expires_at <= time();
         } else if (\is_string($token)) {
             return self::expired(self::verify($token, $secret));
         }

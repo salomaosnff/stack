@@ -130,14 +130,12 @@ class OAuthTokenServer
         }
 
         // Save token
-        $save = $this->saveToken($client, $user, $accessToken, $refreshToken);
+        $save = $this->saveToken($accessToken, $refreshToken, $user, $client);
         if (!$save) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'cannot_save_token');
         }
 
         return (object) (is_bool($save) ? [
-            'client'        => $client,
-            'user'          => $user,
             'access_token'  => $accessToken,
             'refresh_token' => $refreshToken,
         ] : $save);
@@ -160,19 +158,18 @@ class OAuthTokenServer
         }
         $payload = (object) $payload;
 
+        /**
+         * Validate token expiration time
+         */
+
         // Validate expiration date field
-        if (!isset($payload->refresh_token_exp)) {
+        if (!isset($payload->exp)) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR,
                 'refresh_token_exp_not_set');
         }
 
-        /**
-         * Verifies that the current refresh token is expired
-         */
-        $expires_at = $payload->refresh_token_exp;
-
         // Verifies that the refresh token is expired
-        if ($expires_at >= 0 && $expires_at <= time()) {
+        if (JWT::expired($payload)) {
             throw new HttpException(HttpException::UNAUTHORIZED, 'refresh_token_expired');
         }
 
@@ -197,14 +194,12 @@ class OAuthTokenServer
         }
 
         // Save token to database
-        $save = $this->saveToken($client, $user, $accessToken, $refreshToken);
+        $save = $this->saveToken($accessToken, $refreshToken, $user, $client);
         if (!$save) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'cannot_save_token');
         }
 
         return (object) (is_bool($save) ? [
-            'client'        => $client,
-            'user'          => $user,
             'access_token'  => $accessToken,
             'refresh_token' => $refreshToken,
         ] : $save);
@@ -229,6 +224,7 @@ class OAuthTokenServer
         return $res->json([
             'access_token'  => $result->access_token,
             'refresh_token' => $result->refresh_token,
+            'token_type'    => "bearer",
         ]);
     }
 
@@ -286,13 +282,13 @@ class OAuthTokenServer
 
         // Check authorization
         if (empty($oauth_req->authorization)) {
-            throw new HttpException(HttpException::FORBIDDEN, 'missing_authorization');
+            throw new HttpException(HttpException::UNAUTHORIZED, 'missing_authorization');
         }
 
         // Get access token payload
         $payload = $this->getAccessToken($oauth_req->authorization);
         if (!$payload) {
-            throw new HttpException(HttpException::BAD_REQUEST, 'invalid_access_token');
+            throw new HttpException(HttpException::UNAUTHORIZED, 'invalid_access_token');
         }
 
         // Validate expiration date field
@@ -310,13 +306,13 @@ class OAuthTokenServer
         // Get client credentials
         $client = $this->getClient($payload->client->id);
         if (!$client) {
-            throw new HttpException(HttpException::BAD_REQUEST, 'invalid_client');
+            throw new HttpException(HttpException::UNAUTHORIZED, 'invalid_client');
         }
 
         // Get user credentials
         $user = $this->getUser($payload->user->id);
         if (!$user) {
-            throw new HttpException(HttpException::BAD_REQUEST, 'invalid_user');
+            throw new HttpException(HttpException::UNAUTHORIZED, 'invalid_user');
         }
 
         // Inject auth data to request
