@@ -74,25 +74,27 @@ class OAuthTokenServer
     /**
      * Generate token from request
      *
-     * @param OAuthRequest $request
+     * @param OAuthRequest $oauth_req
+     * @param HttpRequest $req
+     * @param HttpResponse $res
      * @return object|HttpException
      */
-    private function token(OAuthRequest $request)
+    private function token(OAuthRequest $oauth_req, HttpRequest $req, HttpResponse $res)
     {
-        if (empty($request->authorization)) {
+        if (empty($oauth_req->authorization)) {
             throw new HttpException(HttpException::BAD_REQUEST, 'full_authentication_required');
         }
 
-        if (empty($request->grant_type)) {
+        if (empty($oauth_req->grant_type)) {
             throw new HttpException(HttpException::BAD_REQUEST, 'missing_grant_type');
         }
 
-        if ($request->grant_type === 'password') {
-            return $this->auth_password($request);
+        if ($oauth_req->grant_type === 'password') {
+            return $this->auth_password($oauth_req, $req, $res);
         }
 
-        if ($request->grant_type === 'refresh_token') {
-            return $this->auth_refresh_token($request);
+        if ($oauth_req->grant_type === 'refresh_token') {
+            return $this->auth_refresh_token($oauth_req, $req, $res);
         }
         throw new HttpException(HttpException::BAD_REQUEST, 'invalid_grant_type');
     }
@@ -101,9 +103,11 @@ class OAuthTokenServer
      * Generate token from user credentials
      *
      * @param OAuthRequest $request
+     * @param HttpRequest $req
+     * @param HttpResponse $res
      * @return object|HttpException
      */
-    private function auth_password(OAuthRequest $request)
+    private function auth_password(OAuthRequest $request, HttpRequest $req, HttpResponse $res)
     {
         // Get client
         $client = $this->getClient($request->client->id, $request->client->secret);
@@ -129,8 +133,17 @@ class OAuthTokenServer
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'invalid_refresh_token');
         }
 
-        // Save token
-        $save = $this->saveToken($accessToken, $refreshToken, $user, $client);
+        /**
+         * Let controller save and change tokens
+         */
+        $save = $this->saveToken([
+            'access_token'  => $accessToken,
+            'refresh_token' => $refreshToken,
+            'user'          => $user,
+            'client'        => $client,
+        ], $req, $res);
+
+        // Check if token has been saved successfully
         if (!$save) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'cannot_save_token');
         }
@@ -145,9 +158,11 @@ class OAuthTokenServer
      * Generate new access token from refresh token
      *
      * @param OAuthRequest $request
+     * @param HttpRequest $req
+     * @param HttpResponse $res
      * @return object|HttpException
      */
-    public function auth_refresh_token(OAuthRequest $request)
+    public function auth_refresh_token(OAuthRequest $request, HttpRequest $req, HttpResponse $res)
     {
         $refreshToken = $request->refresh_token;
 
@@ -193,8 +208,17 @@ class OAuthTokenServer
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'invalid_access_token');
         }
 
-        // Save token to database
-        $save = $this->saveToken($accessToken, $refreshToken, $user, $client);
+        /**
+         * Let controller save and change tokens
+         */
+        $save = $this->saveToken([
+            'access_token'  => $accessToken,
+            'refresh_token' => $refreshToken,
+            'user'          => $user,
+            'client'        => $client,
+        ], $req, $res);
+
+        // Check if token has been saved successfully
         if (!$save) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'cannot_save_token');
         }
@@ -215,7 +239,7 @@ class OAuthTokenServer
      */
     public function server(HttpRequest $req, HttpResponse $res)
     {
-        $result = static::token(new OAuthRequest($req));
+        $result = static::token(new OAuthRequest($req), $req, $res);
 
         if ($result instanceof \Exception) {
             return $result;

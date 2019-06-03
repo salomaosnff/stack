@@ -1,6 +1,9 @@
 <?php
 namespace Stack\Plugins\OAuth;
 
+use Stack\Lib\HttpRequest;
+use Stack\Lib\HttpResponse;
+
 /**
  * OAuth Controller implementation class
  * @package Stack\Plugins\OAuth
@@ -64,13 +67,12 @@ abstract class OAuthControllerBase
     /**
      * Function to save the access token somewhere in the back-end
      *
-     * @param string $access_token
-     * @param string $refresh_token
-     * @param object $user
-     * @param object $client
-     * @return object|null
+     * @param array $data Access token, refresh token, user and client in an assoc. array
+     * @param HttpRequest $req Http request
+     * @param HttpResponse $res Http response
+     * @return object|array|null
      */
-    abstract public function saveToken(string $access_token, string $refresh_token, object $user, object $client): ?object;
+    abstract public function saveToken(array $data, HttpRequest $req, HttpResponse $res);
 
     /**
      * Revoke a token to database
