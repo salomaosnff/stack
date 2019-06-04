@@ -16,8 +16,7 @@ use Stack\Lib\HttpResponse;
  * @method object|null getRefreshToken(string $refresh_token)
  * @method object|null saveToken(object $client, object $user, string $access_token, string $refresh_token)
  * @method bool|null revokeToken($access_token, $refresh_token)
- * @method bool validateAccessToken($access_token, array $options = [])
- * @method bool validateRefreshToken($refresh_token, array $options = [])
+ * @method validateSession(HttpRequest $request, HttpResponse $response)
  * @package Stack\Plugins\OAuth
  */
 class OAuthTokenServer
@@ -63,7 +62,7 @@ class OAuthTokenServer
     public function __call($name, $arguments)
     {
         if (!\method_exists($this->controller, $name)) {
-            if (in_array($name, ['saveAccessToken'])) {
+            if (in_array($name, ['saveAccessToken', 'validateSession'])) {
                 return true;
             }
             throw new \Exception('invalid_oauth_method_call');
@@ -294,10 +293,14 @@ class OAuthTokenServer
      * Protect request
      *
      * @param HttpRequest $req
+     * @param HttpResponse $res
      * @return HttpException
      */
-    public function session(HttpRequest $req)
+    public function session(HttpRequest $req, HttpResponse $res)
     {
+        // Controller session validation
+        $this->validateSession($req, $res);
+
         // Check if oauth is set
         if (!isset($req->oauth_request)) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'missing_oauth_request');
@@ -316,14 +319,13 @@ class OAuthTokenServer
         }
 
         // Validate expiration date field
-        if (!isset($payload->access_token_exp)) {
+        if (!isset($payload->exp)) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR,
                 'access_token_exp_not_set');
         }
-        $expire_at = $payload->access_token_exp;
 
         // Verifies if the current token is expired
-        if ($expire_at >= 0 && $expire_at <= time()) {
+        if (JWT::expired($payload)) {
             throw new HttpException(HttpException::UNAUTHORIZED, 'access_token_expired');
         }
 

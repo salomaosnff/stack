@@ -82,25 +82,17 @@ abstract class OAuthControllerBase
      * @return bool|null
      */
     public function revokeToken($access_token, $refresh_token): ?bool
-    {return true;}
+    {
+        return true;
+    }
 
     /**
-     * Validate a access token
-     *
-     * @param $access_token
-     * @param array $options
-     * @return bool
+     * Validate session
+     * @param HttpRequest $req
+     * @param HttpResponse $res
      */
-    public function validateAccessToken($access_token, array $options = []): bool
-    {return true;}
-
-    /**
-     * Validate a refresh token
-     *
-     * @param $refresh_token
-     * @param array $options
-     * @return bool
-     */
-    public function validateRefreshToken($refresh_token, array $options = []): bool
-    {return true;}
+    public function validateSession(HttpRequest $req, HttpResponse $res)
+    {
+        return true;
+    }
 }
