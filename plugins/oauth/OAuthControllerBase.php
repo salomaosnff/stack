@@ -79,9 +79,11 @@ abstract class OAuthControllerBase
      *
      * @param array|object $access_token
      * @param array|object $refresh_token
+     * @param HttpRequest $req
+     * @param HttpResponse $res
      * @return bool|null
      */
-    public function revokeToken($access_token, $refresh_token): ?bool
+    public function revokeToken($access_token, $refresh_token, HttpRequest $req, HttpResponse $res): ?bool
     {
         return true;
     }

@@ -282,7 +282,7 @@ class OAuthTokenServer
             throw new HttpException(HttpException::BAD_REQUEST, 'invalid_refresh_token');
         };
 
-        if ($this->revokeToken($access_token, $refresh_token)) {
+        if ($this->revokeToken($access_token, $refresh_token, $req, $res)) {
             return $res->status(204);
         }
         throw new HttpException(HttpException::BAD_REQUEST,
