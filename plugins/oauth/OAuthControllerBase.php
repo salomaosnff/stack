@@ -87,14 +87,4 @@ abstract class OAuthControllerBase
     {
         return true;
     }
-
-    /**
-     * Validate session
-     * @param HttpRequest $req
-     * @param HttpResponse $res
-     */
-    public function validateSession(HttpRequest $req, HttpResponse $res)
-    {
-        return true;
-    }
 }

@@ -16,7 +16,6 @@ use Stack\Lib\HttpResponse;
  * @method object|null getRefreshToken(string $refresh_token)
  * @method object|null saveToken(object $client, object $user, string $access_token, string $refresh_token)
  * @method bool|null revokeToken($access_token, $refresh_token)
- * @method validateSession(HttpRequest $request, HttpResponse $response)
  * @package Stack\Plugins\OAuth
  */
 class OAuthTokenServer
@@ -62,7 +61,7 @@ class OAuthTokenServer
     public function __call($name, $arguments)
     {
         if (!\method_exists($this->controller, $name)) {
-            if (in_array($name, ['saveAccessToken', 'validateSession'])) {
+            if (in_array($name, ['saveAccessToken'])) {
                 return true;
             }
             throw new \Exception('invalid_oauth_method_call');
@@ -298,9 +297,6 @@ class OAuthTokenServer
      */
     public function session(HttpRequest $req, HttpResponse $res)
     {
-        // Controller session validation
-        $this->validateSession($req, $res);
-
         // Check if oauth is set
         if (!isset($req->oauth_request)) {
             throw new HttpException(HttpException::INTERNAL_SERVER_ERROR, 'missing_oauth_request');
