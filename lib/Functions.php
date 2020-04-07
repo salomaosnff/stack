@@ -1,4 +1,5 @@
 <?php
+
 use Stack\Lib\HttpRequest;
 use Stack\Lib\Router;
 
@@ -30,7 +31,7 @@ function normalize_method($method, $controllers = '')
  * @param string ...$url
  * @return string|string[]|null
  */
-function normalize_url(string...$url)
+function normalize_url(string ...$url)
 {
     array_unshift($url, '/');
     $url = join('/', $url);
@@ -50,7 +51,9 @@ function url_params(string $url, bool $end = true)
     $params = [];
     $regex  = ['@^'];
 
-    $url = \preg_replace_callback('@:([\w-_]+)([^\/]*)@', function ($match) use (&$params) {
+    var_dump($url);
+
+    $url = \preg_replace_callback('@:([\w\-_]+)([^\/]*)@', function ($match) use (&$params) {
         $name     = $match[1];
         $params[] = $name;
 
