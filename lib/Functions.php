@@ -51,8 +51,6 @@ function url_params(string $url, bool $end = true)
     $params = [];
     $regex  = ['@^'];
 
-    var_dump($url);
-
     $url = \preg_replace_callback('@:([\w\-_]+)([^\/]*)@', function ($match) use (&$params) {
         $name     = $match[1];
         $params[] = $name;
